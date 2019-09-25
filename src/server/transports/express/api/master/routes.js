@@ -1,0 +1,59 @@
+
+const controllers = require('./controllers');
+
+module.exports = [
+  /**
+   * Get candidates to add the document
+   * 
+   * @api {post} /api/master/get-document-addition-candidates
+   * @apiParam {object} info
+   * @apiParam {string} info.collection
+   * @apiParam {string} [info.pkValue]
+   * @apiSuccess {object} - { candidates: ... }
+   */
+  { 
+    name: 'getDocumentAdditionCandidates', 
+    method: 'post',
+    url: '/get-document-addition-candidates', 
+    fn: controllers.getDocumentAdditionCandidates
+  },
+
+  /**
+   * Get the documents
+   * 
+   * @api {post} /api/master/get-documents
+   * @apiParam {string} collection
+   */
+  { 
+    name: 'getDocuments',
+    method: 'post', 
+    url: '/get-documents', 
+    fn: controllers.getDocuments
+  },
+
+  /**
+   * Update the documents
+   * 
+   * @api {post} /api/master/update-documents
+   * @apiParam {string} collection
+   */
+  { 
+    name: 'updateDocuments',
+    method: 'post', 
+    url: '/update-documents', 
+    fn: controllers.updateDocuments
+  },
+
+  /**
+   * Delete the documents 
+   * 
+   * @api {post} /api/master/delete-documents
+   * @apiParam {string} collection
+   */
+  { 
+    name: 'deleteDocuments',
+    method: 'post', 
+    url: '/delete-documents', 
+    fn: controllers.deleteDocuments
+  }
+];

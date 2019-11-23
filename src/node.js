@@ -1,6 +1,6 @@
 const _ = require('lodash');
-const DatabaseLoki = require('./db/transports/loki')();
-const ServerExpress = require('./server/transports/express')();
+const DatabaseLokiMetastocle = require('./db/transports/loki')();
+const ServerExpressMetastocle = require('./server/transports/express')();
 const utils = require('./utils');
 const errors = require('./errors');
 const schema = require('./schema');
@@ -12,8 +12,8 @@ module.exports = (Parent) => {
    */
   return class NodeMetastocle extends (Parent || Node) {
     static get codename () { return 'metastocle' }
-    static get DatabaseTransport () { return DatabaseLoki }
-    static get ServerTransport () { return ServerExpress }
+    static get DatabaseTransport () { return DatabaseLokiMetastocle }
+    static get ServerTransport () { return ServerExpressMetastocle }
 
     /**
      * @see Node

@@ -32,7 +32,6 @@ module.exports = [
     url: '/update-documents',
     fn: controllers.updateDocuments
   },
-
   
   /**
    * Delete the document
@@ -91,5 +90,5 @@ module.exports = [
     method: 'post', 
     url: '/get-document-by-pk',
     fn: controllers.getDocumentByPk
-  },
+  }
 ];

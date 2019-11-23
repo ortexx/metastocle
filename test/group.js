@@ -1,7 +1,6 @@
 const assert = require('chai').assert;
 const Node = require('../src/node')();
 const Client = require('../src/client')();
-const utils = require('../src/utils');
 const tools = require('./tools');
 
 describe('group communication', () => {

@@ -64,7 +64,6 @@ describe('group communication', () => {
     catch(err) {
       assert.isOk(err.message.match('already exists'), 'check the error');
     }
-    
 
     await tools.wait(documentAdditionNodeTimeout);
     let count = 0;
@@ -98,7 +97,6 @@ describe('group communication', () => {
     catch(err) {
       assert.isOk(err.message.match('already exists'), 'check the error');
     }
-    
 
     await tools.wait(documentAdditionNodeTimeout);
     let count = 0;

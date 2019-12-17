@@ -279,7 +279,7 @@ module.exports = (Parent) => {
     async updateDocument(document, options = {}) {
       const fullName = this.createCollectionName(document.$collection);
       document.$updatedAt = document.$accessedAt = Date.now();
-      document = await this.handleDocument(document, options);      
+      document = await this.handleDocument(document, options);
       this.col[fullName].update(document);
       return this.prepareDocumentToGet(document);
     }

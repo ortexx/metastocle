@@ -1,12 +1,16 @@
 const merge = require('lodash/merge');
 const Client = require('spreadable/src/client')();
 const utils = require('./utils');
+const errors = require('./errors');
 
 module.exports = (Parent) => {
   /**
    * Class to manage client requests to the network
    */
   return class ClientMetastocle extends (Parent || Client) {
+    static get utils () { return utils }
+    static get errors () { return errors }
+
     constructor(options = {}) {
       options = merge({
         request: {

@@ -471,7 +471,7 @@ module.exports = (Parent) => {
         if(err instanceof errors.WorkError) {
           return false;
         }
-
+        
         throw err;
       }
     }
@@ -491,7 +491,7 @@ module.exports = (Parent) => {
             
       if(!collection.queue && collection.limit && count >= collection.limit) {
         const msg = `Too much documents are in the collection "${ collection.name }"`;
-        throw new errors.WorkError(msg, 'ERR_METASCTOCLE_LIMITED');
+        throw new errors.WorkError(msg, 'ERR_METASCTOCLE_DOCUMENTS_LIMITED');
       }
     }
 
@@ -517,20 +517,30 @@ module.exports = (Parent) => {
      */
     async getDocumentAdditionCandidatesFilterOptions(info) {
       return {
-        fnCompare: await this.createSuspicionComparisonFunction('addDocument', (a, b) => {
-          if(a.isFull && !b.isFull) {
-            return 1;
-          }
-  
-          if(b.isFull && !a.isFull) {
-            return -1;
-          }
-
-          return a.count - b.count;
-        }),
+        fnCompare: await this.createSuspicionComparisonFunction('addDocument', await this.createDocumentAdditionComparisonFunction()),
         fnFilter: c => !c.existenceInfo || c.isAvailable,
         schema: schema.getDocumentAdditionInfoSlaveResponse(),
         limit: await this.getDocumentDuplicatesCount(info)
+      }
+    }
+
+    /**
+     * Create a document addition comparison function
+     * 
+     * @async
+     * @returns {function}
+     */
+    async createDocumentAdditionComparisonFunction() {
+      return (a, b) => {
+        if(a.isFull && !b.isFull) {
+          return 1;
+        }
+
+        if(b.isFull && !a.isFull) {
+          return -1;
+        }
+
+        return a.count - b.count;
       }
     }
 

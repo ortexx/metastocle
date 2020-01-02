@@ -1,6 +1,7 @@
 
 
 const controllers = require('./controllers');
+const midds = require('../midds');
 
 module.exports = [
   /**
@@ -15,7 +16,10 @@ module.exports = [
     name: 'addDocument', 
     method: 'post', 
     url: '/add-document',
-    fn: controllers.addDocument
+    fn: [
+      midds.requestQueueClient,
+      controllers.addDocument
+    ]
   },
   
   /**
@@ -30,7 +34,10 @@ module.exports = [
     name: 'updateDocuments', 
     method: 'post', 
     url: '/update-documents',
-    fn: controllers.updateDocuments
+    fn: [
+      midds.requestQueueClient,
+      controllers.updateDocuments
+    ]
   },
   
   /**
@@ -44,7 +51,10 @@ module.exports = [
     name: 'deleteDocuments', 
     method: 'post', 
     url: '/delete-documents',
-    fn: controllers.deleteDocuments
+    fn: [
+      midds.requestQueueClient,
+      controllers.deleteDocuments
+    ]
   },
 
   /**
@@ -59,7 +69,10 @@ module.exports = [
     name: 'getDocuments', 
     method: 'post', 
     url: '/get-documents',
-    fn: controllers.getDocuments
+    fn: [
+      midds.requestQueueClient,
+      controllers.getDocuments
+    ]
   },
 
    /**
@@ -74,7 +87,10 @@ module.exports = [
     name: 'getDocumentsCount', 
     method: 'post', 
     url: '/get-documents-count',
-    fn: controllers.getDocumentsCount
+    fn: [
+      midds.requestQueueClient,
+      controllers.getDocumentsCount
+    ]
   },
 
    /**
@@ -89,6 +105,9 @@ module.exports = [
     name: 'getDocumentByPk', 
     method: 'post', 
     url: '/get-document-by-pk',
-    fn: controllers.getDocumentByPk
+    fn: [
+      midds.requestQueueClient,
+      controllers.getDocumentByPk
+    ]
   }
 ];

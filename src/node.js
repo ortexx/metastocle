@@ -160,9 +160,13 @@ module.exports = (Parent) => {
       const info = { collection: collectionName };
       collection.pk && (info.pkValue = _.get(document, collection.pk));
       collection.schema && utils.validateSchema(collection.schema, document);
+      const masterRequestTimeout = this.getRequestMastersTimeout(options);
       const results = await this.requestMasters('get-document-addition-candidates', {
         body: { info },
-        timeout: timer([this.getRequestMastersTimeout(options), this.getRequestServerTimeout()]),
+        timeout: timer(
+          [masterRequestTimeout, this.options.request.documentAdditionNodeTimeout],
+          { min: masterRequestTimeout, grabFree: true }
+        ),
         masterTimeout: options.masterTimeout,
         slaveTimeout: options.slaveTimeout,
         responseSchema: schema.getDocumentAdditionCandidatesMasterResponse({ 
@@ -221,12 +225,11 @@ module.exports = (Parent) => {
       }
 
       await this.collectionTest(collectionName);
-      const timer = this.createRequestTimer(options.timeout);
       document = this.prepareDocumentToUpdate(document);
       const actions = utils.prepareDocumentUpdationActions(options);
       const results =  await this.requestMasters('update-documents', {
         body: { actions, collection: collectionName, document },
-        timeout: timer(),
+        timeout: options.timeout,
         responseSchema: schema.updateDocumentsMasterResponse(),
         masterTimeout: options.masterTimeout,
         slaveTimeout: options.slaveTimeout
@@ -245,11 +248,10 @@ module.exports = (Parent) => {
      */
     async deleteDocuments(collectionName, options = {}) {
       await this.collectionTest(collectionName);
-      const timer = this.createRequestTimer(options.timeout);
       const actions = utils.prepareDocumentUpdationActions(options);
       const results = await this.requestMasters('delete-documents', {
         body: { actions, collection: collectionName },
-        timeout: timer(),
+        timeout: options.timeout,
         responseSchema: schema.deleteDocumentsMasterResponse(),
         masterTimeout: options.masterTimeout,
         slaveTimeout: options.slaveTimeout
@@ -268,12 +270,11 @@ module.exports = (Parent) => {
      */
     async getDocuments(collectionName, options = {}) {     
       await this.collectionTest(collectionName);
-      const timer = this.createRequestTimer(options.timeout);
       const collection = await this.getCollection(collectionName);
       const actions = utils.prepareDocumentGettingActions(options);
       const results = await this.requestMasters('get-documents', {
         body: { actions, collection: collectionName },
-        timeout: timer(),
+        timeout: options.timeout,
         masterTimeout: options.masterTimeout,
         slaveTimeout: options.slaveTimeout,
         responseSchema: schema.getDocumentsMasterResponse({ schema: collection.schema })
@@ -422,10 +423,11 @@ module.exports = (Parent) => {
      */
     async duplicateDocument(servers, document, info, options = {}) {
       const collection = await this.getCollection(info.collection);
-      options = _.merge({}, options, {
+      options = _.assign({
         responseSchema: schema.getDocumentAdditionResponse({ schema: collection.schema })
-      });       
-      options.body = { info, document, timeout: options.timeout || this.options.request.documentAdditionNodeTimeout };
+      }, options);
+      options.body = { info, document };
+      options.serverOptions = { timeout: this.options.request.documentAdditionNodeTimeout };
       return await this.duplicateData('add-document', servers, options);
     }    
 

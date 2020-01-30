@@ -1,4 +1,4 @@
-# [Metastocle](https://github.com/ortexx/metastocle/) [alpha]
+# [Metastocle](https://github.com/ortexx/metastocle/) [alpha] [![npm version](https://badge.fury.io/js/metastocle.svg)](https://badge.fury.io/js/metastocle)
 
 Metastocle is a decentralized data storage based on
 the [spreadable](https://github.com/ortexx/spreadable/) protocol.

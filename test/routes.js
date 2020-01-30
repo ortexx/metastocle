@@ -12,13 +12,18 @@ describe('routes', () => {
 
   before(async function() {
     node = new Node(await tools.createNodeOptions({ 
-      network: { secretKey: 'key' }, 
+      network: { 
+        auth: { username: 'username', password: 'password' }
+      }, 
       collections: {
         test: { pk: 'id' }
       }
     }));
     await node.init();
-    client = new Client(await tools.createClientOptions({ address: node.address, secretKey: 'key' }));
+    client = new Client(await tools.createClientOptions({ 
+      address: node.address, 
+      auth: { username: 'username', password: 'password' }
+    }));
     await client.init();
   });
 
@@ -28,9 +33,9 @@ describe('routes', () => {
   });
 
   describe('/status', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/status`);
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return the status', async function () { 
@@ -53,9 +58,9 @@ describe('routes', () => {
   });
 
   describe('/client/add-document', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/client/add-document`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return an error', async function () { 
@@ -78,9 +83,9 @@ describe('routes', () => {
   });
 
   describe('/client/update-documents', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/client/update-documents`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return an error', async function () { 
@@ -117,9 +122,9 @@ describe('routes', () => {
   });
 
   describe('/client/get-documents', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/client/get-documents`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should get the documents', async function () {
@@ -145,9 +150,9 @@ describe('routes', () => {
   });
 
   describe('/client/get-documents-count', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/client/get-documents-count`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should get the documents count', async function () {
@@ -173,9 +178,9 @@ describe('routes', () => {
   });
 
   describe('/client/get-document-by-pk', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/client/get-document-by-pk`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should get the document', async function () {
@@ -202,9 +207,9 @@ describe('routes', () => {
   });
 
   describe('/client/delete-document/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/client/delete-documents/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should not delete the filtered document', async function () { 
@@ -232,9 +237,9 @@ describe('routes', () => {
   });
 
   describe('/api/master/get-document-addition-candidates/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/master/get-document-addition-candidates/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a master acception error', async function () { 
@@ -271,9 +276,9 @@ describe('routes', () => {
       await node.addDocument('test', { id: 1 });
     });
 
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/master/get-documents/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a master acception error', async function () { 
@@ -304,9 +309,9 @@ describe('routes', () => {
   });
 
   describe('/api/master/update-documents/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/master/update-documents/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a master acception error', async function () { 
@@ -338,9 +343,9 @@ describe('routes', () => {
   });
 
   describe('/api/master/delete-documents/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/master/delete-documents/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a master acception error', async function () { 
@@ -371,9 +376,9 @@ describe('routes', () => {
   });
 
   describe('/api/slave/get-document-addition-info/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/slave/get-document-addition-info/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a data error', async function () { 
@@ -404,9 +409,9 @@ describe('routes', () => {
       await node.addDocument('test', { id: 1 });
     });
 
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/slave/get-documents/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a data error', async function () { 
@@ -431,9 +436,9 @@ describe('routes', () => {
   });
 
   describe('/api/slave/update-documents/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/slave/update-documents/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a data error', async function () { 
@@ -459,9 +464,9 @@ describe('routes', () => {
   });
 
   describe('/api/slave/delete-documents/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/slave/delete-documents/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return a data error', async function () { 
@@ -486,9 +491,9 @@ describe('routes', () => {
   });
 
   describe('/api/node/add-document/', function () {
-    it('should return an access error', async function () { 
+    it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/node/add-document/`, { method: 'post' });
-      assert.equal(await res.status, 403);
+      assert.equal(await res.status, 401);
     });
 
     it('should return an error', async function () { 

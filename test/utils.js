@@ -369,10 +369,10 @@ describe('utils', () => {
     });  
   });
 
-  describe('.prepareDocumentUpdationActions()', () => {
+  describe('.prepareDocumentUpdategActions()', () => {
     it('should create the defaults', () => {
       const keys = ['replace', 'filter'];
-      assert.hasAllKeys(utils.prepareDocumentUpdationActions({}), keys);
+      assert.hasAllKeys(utils.prepareDocumentUpdateActions({}), keys);
     });  
 
     it('should create the right actions', () => {
@@ -380,7 +380,7 @@ describe('utils', () => {
         replace: true,
         filter: { x: 1 }
       };
-      const res = utils.prepareDocumentUpdationActions(obj);
+      const res = utils.prepareDocumentUpdateActions(obj);
       assert.equal(JSON.stringify(res), JSON.stringify(obj));
     });  
   });

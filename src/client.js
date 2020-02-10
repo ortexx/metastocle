@@ -16,8 +16,8 @@ module.exports = (Parent) => {
         request: {
           documentAdditionTimeout: '10s',
           documentGettingTimeout: '10s',
-          documentUpdationTimeout: '10s',
-          documentDeletionTimeout: '6s'
+          documentUpdateTimeout: '10s',
+          documentDeletionTimeout: '10s'
         },
       }, options);
       
@@ -59,7 +59,7 @@ module.exports = (Parent) => {
      */
     async updateDocuments(collection, document, options = {}) {
       document = utils.prepareDocumentFields(document);
-      const actions = utils.prepareDocumentUpdationActions(options);
+      const actions = utils.prepareDocumentUpdateActions(options);
       
       return await this.request('update-documents', {
         body: {
@@ -67,7 +67,7 @@ module.exports = (Parent) => {
           document,
           actions
         },
-        timeout: options.timeout || this.options.request.documentUpdationTimeout,
+        timeout: options.timeout || this.options.request.documentUpdateTimeout,
         useInitialAddress: options.useInitialAddress
       });
     }
@@ -142,6 +142,7 @@ module.exports = (Parent) => {
      * 
      * @async
      * @param {string} collection
+     * @param {*} pkValue
      * @param {object} [options]
      * @returns {object}
      */
@@ -165,7 +166,7 @@ module.exports = (Parent) => {
       super.prepareOptions();
       this.options.request.documentAdditionTimeout = utils.getMs(this.options.request.documentAdditionTimeout); 
       this.options.request.documentGettingTimeout = utils.getMs(this.options.request.documentGettingTimeout); 
-      this.options.request.documentUpdationTimeout = utils.getMs(this.options.request.documentUpdationTimeout); 
+      this.options.request.documentUpdateTimeout = utils.getMs(this.options.request.documentUpdateTimeout); 
       this.options.request.documentDeletionTimeout = utils.getMs(this.options.request.documentDeletionTimeout); 
     }
   }

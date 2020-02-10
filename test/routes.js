@@ -103,7 +103,7 @@ describe('routes', () => {
       const res = await fetch(`http://${node.address}/client/update-documents`, options);
       const json = await res.json();
       assert.equal(json.updated, 1, 'check the response');
-      assert.equal(await node.getDocumentsCount('test', { filter: { x: 1 } }), 1, 'check the updation');
+      assert.equal(await node.getDocumentsCount('test', { filter: { x: 1 } }), 1, 'check the update');
     });
 
     it('should not update the filtered document', async function () {

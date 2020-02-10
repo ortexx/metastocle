@@ -81,8 +81,8 @@ module.exports.updateDocuments = node => {
       }      
 
       let documents = await node.db.getDocuments(collection);
-      const actions = utils.prepareDocumentUpdationActions(req.body.actions || {});      
-      const result = await node.handleDocumentsUpdation(documents, document, actions);
+      const actions = utils.prepareDocumentUpdateActions(req.body.actions || {});      
+      const result = await node.handleDocumentsUpdate(documents, document, actions);
       documents = await node.db.updateDocuments(collection, result.documents);      
       res.send({ updated: result.documents.length });
     }

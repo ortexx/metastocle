@@ -57,7 +57,7 @@ module.exports.getDocumentByPk = async node => {
 module.exports.updateDocuments = async node => {
   const collection = argv.collection || argv.o;
   const document = JSON.parse(argv.document || argv.d); 
-  const options = utils.prepareDocumentUpdationActions(argv);  
+  const options = utils.prepareDocumentUpdateActions(argv);  
   const result = await node.updateDocuments(collection, document, options);
   //eslint-disable-next-line no-console
   console.log(chalk.cyan(`Document ${JSON.stringify(document, null, 1)} has been updated ${result.updated} times`));

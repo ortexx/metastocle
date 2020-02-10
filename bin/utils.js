@@ -26,16 +26,16 @@ utils.prepareDocumentGettingActions = function (argv) {
 };
 
 /**
- * Create the document updation actions
+ * Create the document update actions
  * 
  * @param {object} argv
  * @returns {object}
  */
-utils.prepareDocumentUpdationActions = function (argv) {
+utils.prepareDocumentUpdateActions = function (argv) {
   const filter = argv.filter || argv.f;
   const replace = argv.replace || argv.r;
 
-  return scrUtils.prepareDocumentUpdationActions({
+  return scrUtils.prepareDocumentUpdateActions({
     filter: filter? JSON.parse(filter): null,
     replace
   });
@@ -50,7 +50,7 @@ utils.prepareDocumentUpdationActions = function (argv) {
 utils.prepareDocumentDeletionActions = function (argv) {
   const filter = argv.filter || argv.f;
 
-  return scrUtils.prepareDocumentUpdationActions({
+  return scrUtils.prepareDocumentUpdateActions({
     filter: filter? JSON.parse(filter): null
   });
 };

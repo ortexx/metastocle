@@ -420,7 +420,7 @@ utils.DocumentsHandler = class {
    * $lk('text', 'go')
    * 
    * @param {string} value 
-   * @param {string} filter 
+   * @param {string} filter
    */
   $lk(value, filter) {
     utils.validateSchema({ type: 'string' }, value);
@@ -664,12 +664,12 @@ utils.prepareDocumentGettingActions = function (actions) {
 };
 
 /**
- * Prepare the document updation actions
+ * Prepare the document update actions
  * 
  * @param {object} actions
  * @returns {object} 
  */
-utils.prepareDocumentUpdationActions = function (actions) {
+utils.prepareDocumentUpdateActions = function (actions) {
   if(!this.isActions(actions)) {
     const msg =`Wrong actions: ${JSON.stringify(actions, null, 1)}`;
     throw new errors.WorkError(msg, 'ERR_METASTOCLE_WRONG_DOCUMENT_ACTIONS');

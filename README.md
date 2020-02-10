@@ -102,3 +102,232 @@ Storing information of your own projects, websites, etc. The network can be made
 
 ### 3. Serverless solutions
 Since the library is written in javascript, you can work with documents in the browser and do not use server code at all. In some cases, it can be very convenient.
+
+## Node configuration
+
+When you create an instance of the node you can pass options below. Only specific options of this library are described here, without considering the options of the parent classes.
+
+* {number|string} __[request.documentAdditionNodeTimeout="2s"]__ - document addition timeout
+
+* {object} __[meta]__ - section that responds for metadata settings. Basically these are the default options for creating collections.
+
+* {object} __[meta.pk='']__ - default primary key field. If collecion has a primary key you can't add two documents with the same value in the pk field.
+
+* {integer} __[meta.limit=0]__ - default documents limit for collection. If it is zero then there is no limits. 
+
+* {boolean} __[meta.queue=false]__ - default documents queue option. This option works in combination with meta.limit. If the queue is enabled, then when you add a new document that exceeds the limit, another one will be deleted to free up space. First of all, it is documents that were used less often.
+
+* {integer|string} __[meta.preferredDuplicates="auto"]__ - preferred number of documents copies on the network. If indicated in percent, the calculation will be based on the network size. If the option is "auto" it will be calculated as `Math.ceil(Math.sqrt(networkSize))`.
+
+## Client configuration
+
+When you create an instance of the client you can pass options below. Only specific options of this library are described here, without considering the options of the parent classes.
+
+* {number|string} __[request.documentAdditionTimeout="10s"]__ - document storing timeout.
+
+* {number|string} __[request.documentGettingTimeout="10s"]__ - document getting timeout.
+
+* {number|string} __[request.documentUpdateTimeout="10s"]__ - document update timeout.
+
+* {number|string} __[request.documentDeletionTimeout="10s"]__ - document deletion timeout.
+
+## Client interface
+
+async __Client.prototype.addDocument()__ - add file to the network.
+  * {string} __collection__ - collection name
+  * {object} __document__ - document
+  * {object} __[options]__ - addition options
+  * {number} __[options.timeout]__ - addition timeout
+
+async __Client.prototype.getDocuments()__ - get all matched documents.
+  * {string} __collection__ - collection name
+  * {object} __[options]__ - getting options, including all actions.
+  * {number} __[options.timeout]__ - getting timeout
+
+async __Client.prototype.getDocumentsCount()__ - get matched documents count.
+  * {string} __collection__ - collection name
+  * {object} __[options]__ - getting options, including all actions
+  * {number} __[options.timeout]__ - getting timeout
+
+async __Client.prototype.getDocumentByPk()__ - get a document by the primary key.
+  * {string} __collection__ - collection name
+  * {*} __value__ - pk field value
+  * {object} __[options]__ - getting options.
+  * {number} __[options.timeout]__ - getting timeout
+
+async __Client.prototype.deleteDocuments()__ - update all matched documents.
+  * {string} __collection__ - collection name
+  * {object} __[options]__ - deletion options
+  * {number} __[options.timeout]__ - deletion timeout
+
+async __Client.prototype.updateDocuments()__ - get all matched documents.
+  * {string} __collection__ - collection name
+  * {object} __document__ - new updates
+  * {object} __[options]__ - update options, including all actions
+  * {number} __[options.timeout]__ - update timeout
+
+## Actions
+
+When you get, update or delete documents you often need to specify various filters, order, etc. 
+To do this you can pass the following options to the client methods:
+
+* {object} __[filter=null]__ - filtering documents by rules (for getting, update, deletion).
+
+* {string[]} __[fields=null]__ - necessary document fields (for getting).
+
+* {string[]|array[]} __[sort=null]__ - sorting rules (for getting).
+
+* {integer} __[offset=0]__ - starting position in the found array (for getting)
+
+* {integer} __[limit=0]__ - number of required documents (for getting). Zero means it is unlimited.
+
+* {boolean} __[removeDuplicates=true]__ - return only unique documents if there is a primary key in the collection (for getting).
+
+* {boolean} __[replace=false]__ - replace all document by the new one or merge if it's false. (for update).
+
+## Filtering
+
+As we found out earlier you can filter documents. Filters can be nested in each other.
+
+``` 
+{ 
+  a: { lt: 1 },
+  $and: [
+    { x: 1 },
+    { y: { $gt: 2 } },
+    { 
+      $or: [
+        { z: 1 },
+        { "b.c": 2 }
+      ] 
+    }
+  ]
+} 
+```
+
+List of all filters:
+
+* __$eq__ - сompare equality.  
+    ``` 
+    { x: 1 } or { x: { $eq: 1 } }
+    ```
+
+* __$ne__ - сompare inequality.  
+    ``` 
+    { x: { $ne: 1 } }
+    ```
+
+* __$eqs__ - сompare equality strictly (===).  
+    ``` 
+    { x: { $eqs: 1 } }
+    ```
+
+* __$nes__ - сompare inequality strictly (===).  
+    ``` 
+    { x: { $nes: 1 } }
+    ```
+
+* __$gt__ - check the value is greater than the filter.  
+    ``` 
+    { x: { $gt: 1 } }
+    ```
+
+* __$gte__ - check the value is greater or equal than the filter.  
+    ``` 
+    { x: { $gte: 1 } }
+    ```
+
+* __$lt__ - check the value is less than the filter.  
+    ``` 
+    { x: { $lt: 1 } }
+    ```
+
+* __$lte__ - check the value is less or equal than the filter.  
+    ``` 
+    { x: { $lte: 1 } }
+    ```
+
+* __$in__ - check the value is in the array.  
+    ``` 
+    { x: { $in: [1, 2] } }
+    ```
+
+* __$nin__ - check the value is not in the array.  
+    ``` 
+    { x: { $nin: [1, 2] } }
+    ```
+
+* __$sw__ - check the value starts with the filter.  
+    ``` 
+    { x: { $sw: 'ab' } }
+    ```
+
+* __$ew__ - check the value ends with the filter.  
+    ``` 
+    { x: { $ew: 'yz' } }
+    ```
+
+* __$lk__ - check the value matchs the filter.  
+    ``` 
+    { x: { $lk: 'lmno' } }
+    ```
+
+* __$rx__ - check the value matchs the regex filter.  
+    ``` 
+    { x: { $rx: /ab$/i } }
+    ```
+* __$lgt__ - check the array value length is greater than the filter.  
+    ``` 
+    { x: { $lgt: 1 } }
+    ```
+
+* __$lgte__ - check the array value length is greater or equal than the filter.  
+    ``` 
+    { x: { $lgte: 1 } }
+    ```
+
+* __$lgt__ - check the array value length is less than the filter.  
+    ``` 
+    { x: { $llt: 1 } }
+    ```
+
+* __$lgte__ - check the array value length is less or equal than the filter.  
+    ``` 
+    { x: { $llte: 1 } }
+    ```
+
+* __$and__ - rule of following all conditions.  
+    ``` 
+    { 
+      $and: [
+        { x: 1 },
+        { y: { $gt: 2 } }
+      ]
+    } 
+    ```
+
+* __$or__ - rule of following at least one of the conditions.   
+    ``` 
+    { 
+      $or: [
+        { x: 1 },
+        { y: { $gt: 2 } }
+      ]
+    } 
+    ```
+
+## Sorting
+
+Receiving data can be sorted. The option might be in the following form:
+
+``` 
+{ sort: ['x', 'desc'] }
+```
+
+``` 
+{ sort: [['x', 'asc'], ['y.z', 'desc']] }
+```
+
+## Contribution
+
+If you face a bug or have an idea how to improve the library create an issue on github. In order to fix something or add new code yourself fork the library, make changes and create a pull request to the master branch. Don't forget about tests in this case. Also you can join [the project on github](https://github.com/ortexx/metastocle/projects/1).

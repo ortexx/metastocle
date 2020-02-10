@@ -1,16 +1,18 @@
 const _ = require('lodash');
 const DatabaseLokiMetastocle = require('./db/transports/loki')();
 const ServerExpressMetastocle = require('./server/transports/express')();
+const Node = require('spreadable/src/node')();
 const utils = require('./utils');
 const errors = require('./errors');
 const schema = require('./schema');
-const Node = require('spreadable/src/node')();
+const pack = require('../package.json');
 
 module.exports = (Parent) => {
   /**
    * Class to manage the node
    */
   return class NodeMetastocle extends (Parent || Node) {
+    static get version () { return pack.version }
     static get codename () { return 'metastocle' }
     static get DatabaseTransport () { return DatabaseLokiMetastocle }
     static get ServerTransport () { return ServerExpressMetastocle }
@@ -25,8 +27,8 @@ module.exports = (Parent) => {
         },        
         meta: {
           pk: '',
-          queue: false,
           limit: 0,
+          queue: false,          
           preferredDuplicates: "auto"
         },
         collections: {},
@@ -226,7 +228,7 @@ module.exports = (Parent) => {
 
       await this.collectionTest(collectionName);
       document = this.prepareDocumentToUpdate(document);
-      const actions = utils.prepareDocumentUpdationActions(options);
+      const actions = utils.prepareDocumentUpdateActions(options);
       const results =  await this.requestMasters('update-documents', {
         body: { actions, collection: collectionName, document },
         timeout: options.timeout,
@@ -248,7 +250,7 @@ module.exports = (Parent) => {
      */
     async deleteDocuments(collectionName, options = {}) {
       await this.collectionTest(collectionName);
-      const actions = utils.prepareDocumentUpdationActions(options);
+      const actions = utils.prepareDocumentUpdateActions(options);
       const results = await this.requestMasters('delete-documents', {
         body: { actions, collection: collectionName },
         timeout: options.timeout,
@@ -374,7 +376,7 @@ module.exports = (Parent) => {
     }
 
     /**
-     * Handle the documents updation on the slave side
+     * Handle the documents update on the slave side
      * 
      * @async
      * @param {object[]} documents
@@ -382,7 +384,7 @@ module.exports = (Parent) => {
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsUpdation(documents, document, actions = {}) {      
+    async handleDocumentsUpdate(documents, document, actions = {}) {      
       const handler = new utils.DocumentsHandler(documents);      
       actions.filter && handler.filterDocuments(actions.filter);
       documents = handler.getDocuments().map(d => {

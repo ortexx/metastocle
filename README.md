@@ -152,7 +152,7 @@ async __Client.prototype.getDocumentsCount()__ - get matched documents count.
 async __Client.prototype.getDocumentByPk()__ - get a document by the primary key.
   * {string} __collection__ - collection name
   * {*} __value__ - pk field value
-  * {object} __[options]__ - getting options.
+  * {object} __[options]__ - getting options
   * {number} __[options.timeout]__ - getting timeout
 
 async __Client.prototype.deleteDocuments()__ - update all matched documents.

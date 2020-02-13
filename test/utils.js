@@ -270,7 +270,7 @@ describe('utils', () => {
         $and: [
           { d: 1, 
             $or: [
-              { e: new Date() }
+              { e: now }
             ] 
           }
         ]

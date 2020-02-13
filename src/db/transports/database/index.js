@@ -109,6 +109,16 @@ module.exports = (Parent) => {
     }
 
     /**
+     * Remove the collection excess documents
+     * 
+     * @async
+     * @param {string} name
+     */
+    async removeCollectionExcessDocuments() {
+      throw new Error('Method "removeCollectionExcessDocuments" is required for database transport');
+    }
+
+    /**
      * Get the collection size
      * 
      * @async

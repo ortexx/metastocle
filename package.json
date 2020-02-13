@@ -55,7 +55,7 @@
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
     "optimist": "^0.6.1",
-    "spreadable": ">=0.1.0",
+    "spreadable": ">=0.1.1",
     "uuid": "^3.3.3"
   },
   "repository": {

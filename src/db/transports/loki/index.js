@@ -122,11 +122,35 @@ module.exports = (Parent) => {
           .remove()
         }
 
-        if(nodeCollection.limit && collection.count > nodeCollection.limit) {
-          this.col[collection.name].chain().find().simplesort('$accessedAt', true).offset(nodeCollection.limit).remove();
-        }
+        await this.removeCollectionExcessDocuments(name);
       }
     }
+
+     /**
+     * @see DatabaseMetastocle.prototype.removeCollectionExcessDocuments
+     */
+    async removeCollectionExcessDocuments(name) {
+      const fullName = this.createCollectionName(name);
+      const collection = await this.node.getCollection(name);
+      const count = await this.getCollectionSize(name);
+
+      if(!collection.limit || count <= collection.limit) {
+        return;
+      }
+
+      let order = collection.limitationOrder || '$accessedAt';
+      !Array.isArray(order) && (order = [order]);
+      const newOrder = [];
+      
+      
+      for(let i = 0; i < order.length; i++) {
+        let item = order[i];
+        item = Array.isArray(item)? [item[0], item[1] == 'asc']: [item, true];
+        newOrder.push(item);
+      }
+
+      this.col[fullName].chain().find().compoundsort(newOrder).offset(collection.limit).remove();
+    } 
 
     /**
      * @see DatabaseMetastocle.prototype.getCollectionSize
@@ -156,12 +180,8 @@ module.exports = (Parent) => {
       document.$collection = name;
       document = this.prepareDocumentToAdd(document);
       document = await this.handleDocument(document);
-      document = this.col[fullName].insert(document);      
-
-      if(collection.limit) {
-        this.col[fullName].chain().find().simplesort('$accessedAt', true).offset(collection.limit).remove();
-      }
-
+      document = this.col[fullName].insert(document);
+      await this.removeCollectionExcessDocuments(name);
       return this.prepareDocumentToGet(document);
     }
 

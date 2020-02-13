@@ -141,6 +141,38 @@ describe('DatabaseLokiMetastocle', () => {
     });
   });
 
+  describe('.removeCollectionExcessDocuments()', function () { 
+    let col;
+
+    before(async function () {      
+      await this.node.addCollection('test', { limit: 2 });
+      col = loki.col[loki.createCollectionName('test')];
+    });
+
+    after(async function () {
+      await this.node.removeCollection('test');
+    });
+
+    it('should not change the count', async function () {
+      const count = col.chain().count();
+      await loki.removeCollectionExcessDocuments('test');
+      assert.equal(count, col.chain().count());
+    });
+
+    it('should remove the excess documents', async function () {
+      const count = col.chain().count();
+      const limit = (await this.node.getCollection('test')).limit; 
+      const length = limit - count;
+
+      for(let i = 0; i < length + 1; i++) {
+        col.insert({ id: i + 2 });
+      }
+
+      await loki.removeCollectionExcessDocuments('test');
+      assert.equal(col.chain().count(), limit);
+    });
+  });
+
   describe('.getCollectionSize()', function () { 
     let col;
 

@@ -61,7 +61,7 @@ const Client = require('metastocle').Client;
 
     const results2 = await client.getDocuments('test', {
       filter: { id: { $gt: 15 } },
-      sort: ['x', 'desc'],
+      sort: [['x', 'desc']],
       limit: 2,
       offset: 1,
       fields: ['id']
@@ -114,6 +114,8 @@ When you create an instance of the node you can pass options below. Only specifi
 * {object} __[meta.pk='']__ - default primary key field. If collecion has a primary key you can't add two documents with the same value in the pk field.
 
 * {integer} __[meta.limit=0]__ - default documents limit for collection. If it is zero then there is no limits. 
+
+* {string|string[]|array[]} __[meta.limitationOrder="$accessedAt"]__ - sorting procedure for documents to be deleted if the limit is exceeded.
 
 * {boolean} __[meta.queue=false]__ - default documents queue option. This option works in combination with meta.limit. If the queue is enabled, then when you add a new document that exceeds the limit, another one will be deleted to free up space. First of all, it is documents that were used less often.
 
@@ -321,7 +323,19 @@ List of all filters:
 Receiving data can be sorted. The option might be in the following form:
 
 ``` 
-{ sort: ['x', 'desc'] }
+{ sort: 'x' }
+```
+
+``` 
+{ sort: ['x'] }
+```
+
+``` 
+{ sort: ['x', 'y'] }
+```
+
+``` 
+{ sort: [['x', 'desc']] }
 ```
 
 ``` 

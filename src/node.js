@@ -29,7 +29,8 @@ module.exports = (Parent) => {
           pk: '',
           limit: 0,
           queue: false,          
-          preferredDuplicates: "auto"
+          preferredDuplicates: "auto",
+          limitationOrder: '$accessedAt'
         },
         collections: {},
       }, options);
@@ -88,7 +89,8 @@ module.exports = (Parent) => {
         pk: this.options.meta.pk,
         queue: this.options.meta.queue,
         limit: this.options.meta.limit,
-        preferredDuplicates: this.options.meta.preferredDuplicates
+        preferredDuplicates: this.options.meta.preferredDuplicates,
+        limitationOrder: this.options.meta.limitationOrder
       }, options);
       await this.db.addCollection(name, options);
       this.__collections[name] = options;

@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const DatabaseLokiMetastocle = require('./db/transports/loki')();
 const ServerExpressMetastocle = require('./server/transports/express')();
+const Collection = require('./collection/transports/collection')();
 const Node = require('spreadable/src/node')();
 const utils = require('./utils');
 const errors = require('./errors');
@@ -24,13 +25,6 @@ module.exports = (Parent) => {
       options = _.merge({
         request: {
           documentAdditionNodeTimeout: '2s'
-        },        
-        meta: {
-          pk: '',
-          limit: 0,
-          queue: false,          
-          preferredDuplicates: "auto",
-          limitationOrder: '$accessedAt'
         },
         collections: {},
       }, options);
@@ -43,11 +37,44 @@ module.exports = (Parent) => {
      * @see Node.prototype.init
      */
     async init() {
-      await super.init.apply(this, arguments);
-
       for(let key in this.options.collections) {
         await this.addCollection(key, this.options.collections[key]);
       }
+
+      await super.init.apply(this, arguments);
+    }
+
+     /**
+     * @see Node.prototype.initServices
+     */
+    async initServices() {
+      await super.initServices();
+
+      for(let key in this.__collections) {
+        await this.__collections[key].init();      
+      }
+    }
+
+    /**
+     * @see Node.prototype.deinitServices
+     */
+    async deinitServices() {
+      for(let key in this.__collections) {
+        await this.__collections[key].deinit();
+      }
+
+      await super.deinitServices();
+    }
+
+    /**
+     * @see Node.prototype.deinitServices
+     */
+    async destroyServices() {
+      for(let key in this.__collections) {
+        await this.__collections[key].destroy();
+      }
+
+      await super.destroyServices();
     }
 
     /**
@@ -80,20 +107,18 @@ module.exports = (Parent) => {
      * 
      * @async
      * @param {string} name 
-     * @param {object} [options] 
+     * @param {Collection} collection
      */
-    async addCollection(name, options = {}) {
-      options = _.merge({
-        name,
-        schema: this.createDocumentFullSchema(options.schema),
-        pk: this.options.meta.pk,
-        queue: this.options.meta.queue,
-        limit: this.options.meta.limit,
-        preferredDuplicates: this.options.meta.preferredDuplicates,
-        limitationOrder: this.options.meta.limitationOrder
-      }, options);
-      await this.db.addCollection(name, options);
-      this.__collections[name] = options;
+    async addCollection(name, collection) {
+      _.isPlainObject(collection) && (collection = new Collection(this, collection));
+      collection.name = name;
+      
+      if(this.__initialized) {
+        this.logger.warn(`Add collection "${ name }" before the node initialization`);        
+        !collection.__initialized && await collection.init();
+      }
+
+      this.__collections[name] = collection;
     }
 
     /**
@@ -114,7 +139,13 @@ module.exports = (Parent) => {
      * @param {string} name
      */
     async removeCollection(name) {
-      await this.db.removeCollection(name);
+      const collection = this.__collections[name];
+
+      if(!collection) {
+        return;
+      }
+
+      await collection.destroy();
       delete this.__collections[name];
     }
 
@@ -127,6 +158,17 @@ module.exports = (Parent) => {
       if(!await this.getCollection(name))    {
         throw new errors.WorkError(`Collection ${name} doesn't exist`, 'ERR_METASTOCLE_NOT_FOUND_COLLECTION');
       }
+    }
+
+    /**
+     * Test the document
+     * 
+     * @param {object} document
+     */
+    async documentTest(document) {
+      if(!utils.isDocument(document)) {
+        throw new errors.WorkError(`Invalid document`, 'ERR_METASTOCLE_INVALID_DOCUMENT');
+      }  
     }
 
     /**
@@ -164,16 +206,14 @@ module.exports = (Parent) => {
       const info = { collection: collectionName };
       collection.pk && (info.pkValue = _.get(document, collection.pk));
       collection.schema && utils.validateSchema(collection.schema, document);
-      const masterRequestTimeout = this.getRequestMastersTimeout(options);
-      const results = await this.requestMasters('get-document-addition-candidates', {
+      const masterRequestTimeout = await this.getRequestMasterTimeout();
+      const results = await this.requestNetwork('get-document-addition-info', {
         body: { info },
         timeout: timer(
           [masterRequestTimeout, this.options.request.documentAdditionNodeTimeout],
           { min: masterRequestTimeout, grabFree: true }
         ),
-        masterTimeout: options.masterTimeout,
-        slaveTimeout: options.slaveTimeout,
-        responseSchema: schema.getDocumentAdditionCandidatesMasterResponse({ 
+        responseSchema: schema.getDocumentAdditionInfoMasterResponse({ 
           networkOptimum: await this.getNetworkOptimum(),
           schema: collection.schema
         })
@@ -186,7 +226,7 @@ module.exports = (Parent) => {
         return existenceErrFn();
       }
 
-      const filterOptions = Object.assign(await this.getDocumentAdditionCandidatesFilterOptions(info), { limit });
+      const filterOptions = Object.assign(await this.getDocumentAdditionInfoFilterOptions(info), { limit });
       const candidates = await this.filterCandidatesMatrix(results.map(r => r.candidates), filterOptions);
      
       if(!candidates.length && !existing.length) {
@@ -231,12 +271,10 @@ module.exports = (Parent) => {
       await this.collectionTest(collectionName);
       document = this.prepareDocumentToUpdate(document);
       const actions = utils.prepareDocumentUpdateActions(options);
-      const results =  await this.requestMasters('update-documents', {
+      const results =  await this.requestNetwork('update-documents', {
         body: { actions, collection: collectionName, document },
         timeout: options.timeout,
-        responseSchema: schema.updateDocumentsMasterResponse(),
-        masterTimeout: options.masterTimeout,
-        slaveTimeout: options.slaveTimeout
+        responseSchema: schema.updateDocumentsMasterResponse()
       });
       const updated = results.reduce((p, c) => p + c.updated, 0);
       return { updated };
@@ -253,12 +291,10 @@ module.exports = (Parent) => {
     async deleteDocuments(collectionName, options = {}) {
       await this.collectionTest(collectionName);
       const actions = utils.prepareDocumentUpdateActions(options);
-      const results = await this.requestMasters('delete-documents', {
+      const results = await this.requestNetwork('delete-documents', {
         body: { actions, collection: collectionName },
         timeout: options.timeout,
-        responseSchema: schema.deleteDocumentsMasterResponse(),
-        masterTimeout: options.masterTimeout,
-        slaveTimeout: options.slaveTimeout
+        responseSchema: schema.deleteDocumentsMasterResponse()
       });
       const deleted = results.reduce((p, c) => p + c.deleted, 0);
       return { deleted };
@@ -276,11 +312,9 @@ module.exports = (Parent) => {
       await this.collectionTest(collectionName);
       const collection = await this.getCollection(collectionName);
       const actions = utils.prepareDocumentGettingActions(options);
-      const results = await this.requestMasters('get-documents', {
+      const results = await this.requestNetwork('get-documents', {
         body: { actions, collection: collectionName },
         timeout: options.timeout,
-        masterTimeout: options.masterTimeout,
-        slaveTimeout: options.slaveTimeout,
         responseSchema: schema.getDocumentsMasterResponse({ schema: collection.schema })
       });
       return await this.handleDocumentsGettingForClient(results, actions);
@@ -328,14 +362,21 @@ module.exports = (Parent) => {
     }
 
     /**
-     * Handle the documents getting on the masters side
+     * @see NodeMetastocle.prototype.handleDocumentsGettingForButler
+     */
+    async handleDocumentsGettingForMaster() {
+      return await this.handleDocumentsGettingForButler(...arguments);
+    }
+
+    /**
+     * Handle the documents getting on the master side
      * 
      * @async
      * @param {array} arr
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsGettingForMaster(arr, actions = {}) {
+    async handleDocumentsGettingForButler(arr, actions = {}) {
       let documents = arr.reduce((p, c) => p.concat(c.documents), []);
       actions.removeDuplicates && (documents = this.uniqDocuments(documents));
       return { documents };
@@ -521,8 +562,9 @@ module.exports = (Parent) => {
      * @param {object} info
      * @returns {object}
      */
-    async getDocumentAdditionCandidatesFilterOptions(info) {
+    async getDocumentAdditionInfoFilterOptions(info) {
       return {
+        uniq: 'address',
         fnCompare: await this.createSuspicionComparisonFunction('addDocument', await this.createDocumentAdditionComparisonFunction()),
         fnFilter: c => !c.existenceInfo || c.isAvailable,
         schema: schema.getDocumentAdditionInfoSlaveResponse(),

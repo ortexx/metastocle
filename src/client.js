@@ -19,8 +19,7 @@ module.exports = (Parent) => {
           documentUpdateTimeout: '10s',
           documentDeletionTimeout: '10s'
         },
-      }, options);
-      
+      }, options);      
       super(options);
     }
 
@@ -34,17 +33,14 @@ module.exports = (Parent) => {
      * @returns {object}
      */
     async addDocument(collection, document, options = {}) {
-      document = utils.prepareDocumentFields(document);
-      
+      document = utils.prepareDocumentFields(document);      
       const result = await this.request('add-document', {
         body: {
           collection,
           document
         },
-        timeout: options.timeout || this.options.request.documentAdditionTimeout,
-        useInitialAddress: options.useInitialAddress
+        timeout: options.timeout || this.options.request.documentAdditionTimeout
       });
-
       return result.document;
     }
 
@@ -59,17 +55,15 @@ module.exports = (Parent) => {
      */
     async updateDocuments(collection, document, options = {}) {
       document = utils.prepareDocumentFields(document);
-      const actions = utils.prepareDocumentUpdateActions(options);
-      
-      return await this.request('update-documents', {
+      const actions = utils.prepareDocumentUpdateActions(options);      
+      return await this.request('update-documents', Object.assign({}, options, {
         body: {
           collection,
           document,
           actions
         },
-        timeout: options.timeout || this.options.request.documentUpdateTimeout,
-        useInitialAddress: options.useInitialAddress
-      });
+        timeout: options.timeout || this.options.request.documentUpdateTimeout
+      }));
     }
 
     /**
@@ -82,15 +76,13 @@ module.exports = (Parent) => {
      */
     async deleteDocuments(collection, options = {}) {
       const actions = utils.prepareDocumentDeletionActions(options);
-
-      return await this.request('delete-documents', {
+      return await this.request('delete-documents', Object.assign({}, options, {
         body: {
           collection,
           actions
         },
-        timeout: options.timeout || this.options.request.documentDeletionTimeout,
-        useInitialAddress: options.useInitialAddress
-      });
+        timeout: options.timeout || this.options.request.documentDeletionTimeout
+      }));
     }
 
     /**
@@ -103,15 +95,13 @@ module.exports = (Parent) => {
      */
     async getDocuments(collection, options = {}) {
       const actions = utils.prepareDocumentGettingActions(options);
-
-      return await this.request('get-documents', {
+      return await this.request('get-documents', Object.assign({}, options, {
         body: {
           collection,
           actions
         },
-        timeout: options.timeout || this.options.request.documentGettingTimeout,
-        useInitialAddress: options.useInitialAddress
-      });
+        timeout: options.timeout || this.options.request.documentGettingTimeout
+      }));
     }
 
     /**
@@ -124,16 +114,13 @@ module.exports = (Parent) => {
      */
     async getDocumentsCount(collection, options = {}) {
       const actions = utils.prepareDocumentGettingActions(options);
-
-      const result = await this.request('get-documents-count', {
+      const result = await this.request('get-documents-count', Object.assign({}, options, {
         body: {
           collection,
           actions
         },
-        timeout: options.timeout || this.options.request.documentGettingTimeout,
-        useInitialAddress: options.useInitialAddress
-      });
-
+        timeout: options.timeout || this.options.request.documentGettingTimeout
+      }));
       return result.count;
     }
 
@@ -147,15 +134,13 @@ module.exports = (Parent) => {
      * @returns {object}
      */
     async getDocumentByPk(collection, pkValue, options = {}) {
-      const result = await this.request('get-document-by-pk', {
+      const result = await this.request('get-document-by-pk', Object.assign({}, options, {
         body: {
           collection,
           pkValue
         },
-        timeout: options.timeout || this.options.request.documentGettingTimeout,
-        useInitialAddress: options.useInitialAddress
-      });
-
+        timeout: options.timeout || this.options.request.documentGettingTimeout
+      }));
       return result.document;
     }
     

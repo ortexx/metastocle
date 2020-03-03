@@ -1,5 +1,3 @@
-const errors = require('../../../../errors');
-
 /**
  * Add the document
  */
@@ -8,14 +6,8 @@ module.exports.addDocument = node => {
     try {
       const collection = req.body.collection;
       let document = req.body.document;
-
-      if(!await node.checkCollection(collection)) {
-        throw new errors.WorkError('"info.collection" field is invalid', 'ERR_METASTOCLE_INVALID_COLLECTION_FIELD');
-      }
-
-      document = await node.addDocument(collection, document, { 
-        timeout: node.createRequestTimeout(req.body),        
-      });
+      await node.collectionTest(collection); 
+      document = await node.addDocument(collection, document, node.prepareClientMessageOptions(req.body));
       res.send({ document });
     }
     catch(err) {
@@ -33,14 +25,8 @@ module.exports.updateDocuments = node => {
       const collection = req.body.collection;
       const document = req.body.document;
       const actions = req.body.actions || {};
-
-      if(!await node.checkCollection(collection)) {
-        throw new errors.WorkError('"info.collection" field is invalid', 'ERR_METASTOCLE_INVALID_COLLECTION_FIELD');
-      }
-      
-      const result = await node.updateDocuments(collection, document, Object.assign({ 
-        timeout: node.createRequestTimeout(req.body),        
-      }, actions));
+      await node.collectionTest(collection); 
+      const result = await node.updateDocuments(collection, document, node.prepareClientMessageOptions(req.body, actions));
       res.send(result);
     }
     catch(err) {
@@ -57,14 +43,8 @@ module.exports.deleteDocuments = node => {
     try {
       const collection = req.body.collection;
       const actions = req.body.actions || {};
-
-      if(!await node.checkCollection(collection)) {
-        throw new errors.WorkError('"info.collection" field is invalid', 'ERR_METASTOCLE_INVALID_COLLECTION_FIELD');
-      }
-
-      const result = await node.deleteDocuments(collection, Object.assign({ 
-        timeout: node.createRequestTimeout(req.body),        
-      }, actions));
+      await node.collectionTest(collection);
+      const result = await node.deleteDocuments(collection, node.prepareClientMessageOptions(req.body, actions));
       res.send(result);
     }
     catch(err) {
@@ -81,14 +61,8 @@ module.exports.getDocuments = node => {
     try {
       const collection = req.body.collection;
       const actions = req.body.actions || {};
-
-      if(!await node.checkCollection(collection)) {
-        throw new errors.WorkError('"info.collection" field is invalid', 'ERR_METASTOCLE_INVALID_COLLECTION_FIELD');
-      }
-
-      const result = await node.getDocuments(collection, Object.assign({ 
-        timeout: node.createRequestTimeout(req.body),        
-      }, actions));
+      await node.collectionTest(collection); 
+      const result = await node.getDocuments(collection, node.prepareClientMessageOptions(req.body, actions));
       res.send(result);
     }
     catch(err) {
@@ -105,14 +79,8 @@ module.exports.getDocumentsCount = node => {
     try {
       const collection = req.body.collection;
       const actions = req.body.actions || {};
-
-      if(!await node.checkCollection(collection)) {
-        throw new errors.WorkError('"info.collection" field is invalid', 'ERR_METASTOCLE_INVALID_COLLECTION_FIELD');
-      }
-
-      const count = await node.getDocumentsCount(collection, Object.assign({ 
-        timeout: node.createRequestTimeout(req.body),        
-      }, actions));
+      await node.collectionTest(collection); 
+      const count = await node.getDocumentsCount(collection, node.prepareClientMessageOptions(req.body, actions));
       res.send({ count });
     }
     catch(err) {
@@ -129,14 +97,8 @@ module.exports.getDocumentByPk = node => {
     try {
       const collection = req.body.collection;
       const pkValue = req.body.pkValue;
-
-      if(!await node.checkCollection(collection)) {
-        throw new errors.WorkError('"info.collection" field is invalid', 'ERR_METASTOCLE_INVALID_COLLECTION_FIELD');
-      }
-
-      const document = await node.getDocumentByPk(collection, pkValue, { 
-        timeout: node.createRequestTimeout(req.body),   
-      });
+      await node.collectionTest(collection); 
+      const document = await node.getDocumentByPk(collection, pkValue, node.prepareClientMessageOptions(req.body));
       res.send({ document });
     }
     catch(err) {

@@ -13,10 +13,8 @@ const Node = require('metastocle').Node;
       hostname: 'localhost',
       initialNetworkAddress: 'localhost:4000',
     });
-    await node.init();
-
-    // Add the test collection
     await node.addCollection('test', { limit: 10000, pk: 'id' });
+    await node.init();
   }
   catch(err) {
     console.error(err.stack);
@@ -109,17 +107,19 @@ When you create an instance of the node you can pass options below. Only specifi
 
 * {number|string} __[request.documentAdditionNodeTimeout="2s"]__ - document addition timeout
 
-* {object} __[meta]__ - section that responds for metadata settings. Basically these are the default options for creating collections.
+## Collection configuration
 
-* {object} __[meta.pk='']__ - default primary key field. If collecion has a primary key you can't add two documents with the same value in the pk field.
+In production, collections should only be created before the node is initialized! Any collection is an instance of the __Collection__ class. When you add a new collection you can pass the options:
 
-* {integer} __[meta.limit=0]__ - default documents limit for collection. If it is zero then there is no limits. 
+* {object} __[pk='']__ - default primary key field. If collecion has a primary key you can't add two documents with the same value in the pk field.
 
-* {string|string[]|array[]} __[meta.limitationOrder="$accessedAt"]__ - sorting procedure for documents to be deleted if the limit is exceeded.
+* {integer} __[limit=0]__ - default documents limit for collection. If it is zero then there is no limits. 
 
-* {boolean} __[meta.queue=false]__ - default documents queue option. This option works in combination with meta.limit. If the queue is enabled, then when you add a new document that exceeds the limit, another one will be deleted to free up space. First of all, it is documents that were used less often.
+* {string|string[]|array[]} __[limitationOrder="$accessedAt"]__ - sorting procedure for documents to be deleted if the limit is exceeded.
 
-* {integer|string} __[meta.preferredDuplicates="auto"]__ - preferred number of documents copies on the network. If indicated in percent, the calculation will be based on the network size. If the option is "auto" it will be calculated as `Math.ceil(Math.sqrt(networkSize))`.
+* {boolean} __[queue=false]__ - default documents queue option. This option works in combination with meta.limit. If the queue is enabled, then when you add a new document that exceeds the limit, another one will be deleted to free up space. First of all, it is documents that were used less often.
+
+* {integer|string} __[preferredDuplicates="auto"]__ - preferred number of documents copies on the network. If indicated in percent, the calculation will be based on the network size. If the option is "auto" it will be calculated as `Math.ceil(Math.sqrt(networkSize))`.
 
 ## Client configuration
 
@@ -344,4 +344,4 @@ Receiving data can be sorted. The option might be in the following form:
 
 ## Contribution
 
-If you face a bug or have an idea how to improve the library create an issue on github. In order to fix something or add new code yourself fork the library, make changes and create a pull request to the master branch. Don't forget about tests in this case. Also you can join [the project on github](https://github.com/ortexx/metastocle/projects/1).
+If you face a bug or have an idea how to improve the library, create an issue on github. In order to fix something or add new code yourself fork the library, make changes and create a pull request to the master branch. Don't forget about tests in this case. Also you can join [the project on github](https://github.com/ortexx/metastocle/projects/1).

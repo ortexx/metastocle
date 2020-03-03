@@ -42,6 +42,53 @@ schema.getDocumentExistenceInfo = function (options = {}) {
   });
 };
 
+schema.getDocumentAdditionResponse = function (options = {}) {
+  const address = this.getAddress();
+
+  return {
+    type: 'object',
+    props: {
+      address,
+      document:  options.schema || { type: 'object' }
+    },
+    strict: true
+  }
+};
+
+schema.getDocumentAdditionInfoMasterResponse = function (options = {}) {
+  return this.getDocumentAdditionInfoButlerResponse(options);
+}
+
+schema.getDocumentAdditionInfoButlerResponse = function (options = {}) {
+  const address = this.getAddress();
+
+  return {
+    type: 'object',
+    props: {
+      address,
+      candidates: {
+        type: 'array',
+        uniq: 'address',
+        items: this.getDocumentAdditionInfoSlaveResponse(options),        
+        maxLength: options.networkOptimum
+      },
+      existing: {
+        type: 'array',
+        uniq: 'address',
+        items: {
+          type: 'object',
+          props: {
+            address,
+            existenceInfo: this.getDocumentExistenceInfo(options) 
+          },
+          strict: true
+        }
+      }
+    },
+    strict: true
+  }
+};
+
 schema.getDocumentAdditionInfoSlaveResponse = function (options = {}) {
   return {
     type: 'object',
@@ -56,46 +103,13 @@ schema.getDocumentAdditionInfoSlaveResponse = function (options = {}) {
   }
 };
 
-schema.getDocumentAdditionResponse = function (options = {}) {
-  const address = this.getAddress();
+schema.getDocumentsMasterResponse = function (options) {
+  return this.getDocumentsButlerResponse(options);
+}
 
-  return {
-    type: 'object',
-    props: {
-      address,
-      document:  options.schema || { type: 'object' }
-    },
-    strict: true
-  }
-};
-
-schema.getDocumentAdditionCandidatesMasterResponse = function (options = {}) {
-  const address = this.getAddress();
-
-  return {
-    type: 'object',
-    props: {
-      address,
-      candidates: {
-        type: 'array',
-        items: this.getDocumentAdditionInfoSlaveResponse(options),
-        maxLength: options.networkOptimum
-      },
-      existing: {
-        type: 'array',
-        items: {
-          type: 'object',
-          props: {
-            address,
-            existenceInfo: this.getDocumentExistenceInfo(options) 
-          },
-          strict: true
-        }
-      }
-    },
-    strict: true
-  }
-};
+schema.getDocumentsButlerResponse = function (options) {
+  return this.getDocumentsSlaveResponse(options);
+}
 
 schema.getDocumentsSlaveResponse = function (options = {}) {
   const address = this.getAddress();
@@ -113,9 +127,13 @@ schema.getDocumentsSlaveResponse = function (options = {}) {
   }
 };
 
-schema.getDocumentsMasterResponse = function (options) {
-  return this.getDocumentsSlaveResponse(options);
-}
+schema.updateDocumentsMasterResponse = function () {
+  return this.updateDocumentsButlerResponse();
+};
+
+schema.updateDocumentsButlerResponse = function () {
+  return this.updateDocumentsSlaveResponse();
+};
 
 schema.updateDocumentsSlaveResponse = function () {
   const address = this.getAddress();
@@ -130,8 +148,12 @@ schema.updateDocumentsSlaveResponse = function () {
   }
 };
 
-schema.updateDocumentsMasterResponse = function () {
-  return this.updateDocumentsSlaveResponse();
+schema.deleteDocumentsMasterResponse = function () {
+  return this.deleteDocumentsButlerResponse();
+};
+
+schema.deleteDocumentsButlerResponse = function () {
+  return this.deleteDocumentsSlaveResponse();
 };
 
 schema.deleteDocumentsSlaveResponse = function () {
@@ -145,10 +167,6 @@ schema.deleteDocumentsSlaveResponse = function () {
     },
     strict: true
   }
-};
-
-schema.deleteDocumentsMasterResponse = function () {
-  return this.deleteDocumentsSlaveResponse();
 };
 
 module.exports = schema;

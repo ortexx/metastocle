@@ -1,6 +1,3 @@
-const errors = require('../../../../../errors');
-const utils = require('../../../../../utils');
-
 /**
  * Add the document
  */
@@ -9,16 +6,9 @@ module.exports.addDocument = node => {
     try {
       let document = req.body.document;   
       const duplicates = req.body.duplicates || [];
-      const info = req.body.info || {};    
-      
-      if(!utils.isDocument(document)) {
-        throw new errors.WorkError('"document" field is invalid', 'ERR_METASTOCLE_INVALID_DOCUMENT_FIELD');
-      }  
-
-      if(!await node.checkCollection(info.collection)) {
-        throw new errors.WorkError('"info.collection" field is invalid', 'ERR_METASTOCLE_INVALID_COLLECTION_FIELD');
-      }      
-      
+      const info = req.body.info || {}; 
+      await node.documentTest(document); 
+      await node.collectionTest(info.collection);      
       await node.documentAvailabilityTest(info);
       document = await node.db.addDocument(info.collection, document); 
       

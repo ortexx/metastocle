@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const errors = require('../../../../../errors');
 const schema = require('../../../../../schema');
 const utils = require('../../../../../utils');
@@ -12,12 +13,11 @@ module.exports.getDocumentAdditionInfo = node => {
       await node.collectionTest(info.collection);     
       const collection = await node.getCollection(info.collection);
       const options = node.createRequestNetworkOptions(req.body, {
-        responseSchema: schema.getDocumentAdditionInfoButlerResponse({ schema: collection.schema }),   
+        responseSchema: schema.getDocumentAdditionInfoSlaveResponse({ schema: collection.schema }),   
       });
       const results = await node.requestNetwork('get-document-addition-info', options);
-      const existing = results.reduce((p, c) => p.concat(c.existing), []);
-      const opts = await node.getDocumentAdditionInfoFilterOptions(info);
-      const candidates = await node.filterCandidatesMatrix(results.map(r => r.candidates), opts);
+      const existing = results.filter(c => c.existenceInfo).map(c => _.pick(c, ['address', 'existenceInfo']));
+      const candidates = await node.filterCandidates(results, await node.getDocumentAdditionInfoFilterOptions(info));
       res.send({ candidates, existing });
     }
     catch(err) {
@@ -42,7 +42,7 @@ module.exports.getDocuments = node => {
       const results = await node.requestNetwork('get-documents', options);
       
       try {
-        res.send(await node.handleDocumentsGettingForMaster(results, actions));
+        res.send(await node.handleDocumentsGettingForButler(results, actions));
       }
       catch(err) {
         throw new errors.WorkError(err.message, 'ERR_METASTOCLE_DOCUMENTS_HANDLER');
@@ -83,7 +83,7 @@ module.exports.updateDocuments = node => {
  */
 module.exports.deleteDocuments = node => {
   return async (req, res, next) => {
-    try {
+    try {      
       const collection = req.body.collection;
       await node.collectionTest(collection); 
       const options = node.createRequestNetworkOptions(req.body, {

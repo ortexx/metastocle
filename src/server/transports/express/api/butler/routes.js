@@ -5,7 +5,7 @@ module.exports = [
   /**
    * Get candidates to add the document
    * 
-   * @api {post} /api/master/get-document-addition-info
+   * @api {post} /api/butler/get-document-addition-info
    * @apiParam {object} info
    * @apiParam {string} info.collection
    * @apiParam {string} [info.pkValue]
@@ -21,7 +21,7 @@ module.exports = [
   /**
    * Get the documents
    * 
-   * @api {post} /api/master/get-documents
+   * @api {post} /api/butler/get-documents
    * @apiParam {string} collection
    */
   { 
@@ -34,7 +34,7 @@ module.exports = [
   /**
    * Update the documents
    * 
-   * @api {post} /api/master/update-documents
+   * @api {post} /api/butler/update-documents
    * @apiParam {string} collection
    */
   { 
@@ -47,7 +47,7 @@ module.exports = [
   /**
    * Delete the documents 
    * 
-   * @api {post} /api/master/delete-documents
+   * @api {post} /api/butler/delete-documents
    * @apiParam {string} collection
    */
   { 
@@ -57,4 +57,3 @@ module.exports = [
     fn: controllers.deleteDocuments
   }
 ];
-

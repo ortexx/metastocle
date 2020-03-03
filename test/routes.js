@@ -236,67 +236,53 @@ describe('routes', () => {
     });
   });
 
-  describe('/api/master/get-document-addition-candidates/', function () {
+  describe('/api/master/get-document-addition-info/', function () {
+    before(async function() {      
+      await node.addDocument('test', { id: 1 });
+    });
+
     it('should return an auth error', async function () { 
-      const res = await fetch(`http://${node.address}/api/master/get-document-addition-candidates/`, { method: 'post' });
+      const res = await fetch(`http://${node.address}/api/master/get-document-addition-info/`, { method: 'post' });
       assert.equal(await res.status, 401);
     });
 
-    it('should return a master acception error', async function () { 
-      const options = node.createDefaultRequestOptions();
-      const res = await fetch(`http://${node.address}/api/master/get-document-addition-candidates/`, options);
-      assert.equal(await res.status, 422);
-    });
-
     it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
-      const res = await fetch(`http://${node.address}/api/master/get-document-addition-candidates/`, options);
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
+      const res = await fetch(`http://${node.address}/api/master/get-document-addition-info/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
       const body = {
-        ignoreAcception: true,
+        level: 2,
         info: {
           collection: 'test'
         }
       };
       const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
-      const res = await fetch(`http://${node.address}/api/master/get-document-addition-candidates/`, options);
+      const res = await fetch(`http://${node.address}/api/master/get-document-addition-info/`, options);
       const json = tools.createServerResponse(node.address, await res.json());
       assert.doesNotThrow(() => {
-        utils.validateSchema(schema.getDocumentAdditionCandidatesMasterResponse(), json);
+        utils.validateSchema(schema.getDocumentAdditionInfoMasterResponse(), json);
       });
     });
   });
 
   describe('/api/master/get-documents/', function () {
-    before(async function () {
-      await node.addDocument('test', { id: 1 });
-    });
-
     it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/master/get-documents/`, { method: 'post' });
       assert.equal(await res.status, 401);
     });
 
-    it('should return a master acception error', async function () { 
-      const options = node.createDefaultRequestOptions();
-      const res = await fetch(`http://${node.address}/api/master/get-documents/`, options);
-      assert.equal(await res.status, 422);
-    });
-
     it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
       const res = await fetch(`http://${node.address}/api/master/get-documents/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
       const body = {
-        ignoreAcception: true,
+        level: 2,
         collection: 'test'
       };
       const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
@@ -314,22 +300,15 @@ describe('routes', () => {
       assert.equal(await res.status, 401);
     });
 
-    it('should return a master acception error', async function () { 
-      const options = node.createDefaultRequestOptions();
-      const res = await fetch(`http://${node.address}/api/master/update-documents/`, options);
-      assert.equal(await res.status, 422);
-    });
-
     it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
       const res = await fetch(`http://${node.address}/api/master/update-documents/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
       const body = {
-        ignoreAcception: true,
+        level: 2,
         collection: 'test',
         document: { x: 1 }
       };
@@ -348,23 +327,16 @@ describe('routes', () => {
       assert.equal(await res.status, 401);
     });
 
-    it('should return a master acception error', async function () { 
-      const options = node.createDefaultRequestOptions();
-      const res = await fetch(`http://${node.address}/api/master/delete-documents/`, options);
-      assert.equal(await res.status, 422);
-    });
-
-    it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
+    it('should return a data error', async function () {
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
       const res = await fetch(`http://${node.address}/api/master/delete-documents/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
-      const body = {
-        ignoreAcception: true,
-        collection: 'test'
+      const body = { 
+        level: 2,
+        collection: 'test' 
       };
       const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
       const res = await fetch(`http://${node.address}/api/master/delete-documents/`, options);
@@ -375,22 +347,128 @@ describe('routes', () => {
     });
   });
 
+  describe('/api/butler/get-document-addition-info/', function () {
+    it('should return an auth error', async function () { 
+      const res = await fetch(`http://${node.address}/api/butler/get-document-addition-info/`, { method: 'post' });
+      assert.equal(await res.status, 401);
+    });
+
+    it('should return a data error', async function () {
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
+      const res = await fetch(`http://${node.address}/api/butler/get-document-addition-info/`, options);
+      assert.equal(res.status, 422);
+    });
+
+    it('should return the right schema', async function () {
+      const body = {
+        level: 1,
+        info: {
+          collection: 'test'
+        }
+      };
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
+      const res = await fetch(`http://${node.address}/api/butler/get-document-addition-info/`, options);
+      const json = tools.createServerResponse(node.address, await res.json());
+      assert.doesNotThrow(() => {
+        utils.validateSchema(schema.getDocumentAdditionInfoButlerResponse(), json);
+      });
+    });
+  });
+
+  describe('/api/butler/get-documents/', function () {
+    it('should return an auth error', async function () { 
+      const res = await fetch(`http://${node.address}/api/butler/get-documents/`, { method: 'post' });
+      assert.equal(await res.status, 401);
+    });
+
+    it('should return a data error', async function () { 
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
+      const res = await fetch(`http://${node.address}/api/butler/get-documents/`, options);
+      assert.equal(res.status, 422);
+    });
+
+    it('should return the right schema', async function () {
+      const body = {
+        level: 1,
+        collection: 'test'
+      };
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
+      const res = await fetch(`http://${node.address}/api/butler/get-documents/`, options);
+      const json = tools.createServerResponse(node.address, await res.json());
+      assert.doesNotThrow(() => {
+        utils.validateSchema(schema.getDocumentsButlerResponse(), json);
+      });
+    });
+  });
+
+  describe('/api/butler/update-documents/', function () {
+    it('should return an auth error', async function () { 
+      const res = await fetch(`http://${node.address}/api/butler/update-documents/`, { method: 'post' });
+      assert.equal(await res.status, 401);
+    });
+
+    it('should return a data error', async function () { 
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
+      const res = await fetch(`http://${node.address}/api/butler/update-documents/`, options);
+      assert.equal(res.status, 422);
+    });
+
+    it('should return the right schema', async function () {
+      const body = {
+        level: 1,
+        collection: 'test',
+        document: { x: 2 }
+      };
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
+      const res = await fetch(`http://${node.address}/api/butler/update-documents/`, options);
+      const json = tools.createServerResponse(node.address, await res.json());
+      assert.doesNotThrow(() => {
+        utils.validateSchema(schema.updateDocumentsButlerResponse(), json);
+      });
+    });
+  });
+
+  describe('/api/butler/delete-documents/', function () {
+    it('should return an auth error', async function () { 
+      const res = await fetch(`http://${node.address}/api/butler/delete-documents/`, { method: 'post' });
+      assert.equal(await res.status, 401);
+    });
+
+    it('should return a data error', async function () {
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
+      const res = await fetch(`http://${node.address}/api/butler/delete-documents/`, options);
+      assert.equal(res.status, 422);
+    });
+
+    it('should return the right schema', async function () {
+      const body = { 
+        level: 1,
+        collection: 'test' 
+      };
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
+      const res = await fetch(`http://${node.address}/api/butler/delete-documents/`, options);
+      const json = tools.createServerResponse(node.address, await res.json());
+      assert.doesNotThrow(() => {
+        utils.validateSchema(schema.deleteDocumentsButlerResponse(), json);
+      });
+    });
+  });
+
   describe('/api/slave/get-document-addition-info/', function () {
     it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/slave/get-document-addition-info/`, { method: 'post' });
       assert.equal(await res.status, 401);
     });
 
-    it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
+    it('should return a data error', async function () {
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
       const res = await fetch(`http://${node.address}/api/slave/get-document-addition-info/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
       const body = {
-        ignoreAcception: true,
+        level: 0,
         info: {
           collection: 'test'
         }
@@ -405,27 +483,19 @@ describe('routes', () => {
   });
 
   describe('/api/slave/get-documents/', function () {
-    before(async function () {
-      await node.addDocument('test', { id: 1 });
-    });
-
     it('should return an auth error', async function () { 
       const res = await fetch(`http://${node.address}/api/slave/get-documents/`, { method: 'post' });
       assert.equal(await res.status, 401);
     });
 
     it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
       const res = await fetch(`http://${node.address}/api/slave/get-documents/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
-      const body = {
-        ignoreAcception: true,
-        collection: 'test'
-      };
+      const body = { collection: 'test' };
       const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
       const res = await fetch(`http://${node.address}/api/slave/get-documents/`, options);
       const json = tools.createServerResponse(node.address, await res.json());
@@ -441,16 +511,15 @@ describe('routes', () => {
       assert.equal(await res.status, 401);
     });
 
-    it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
+    it('should return a data error', async function () {
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
       const res = await fetch(`http://${node.address}/api/slave/update-documents/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
       const body = {
-        ignoreAcception: true,
+        level: 0,
         collection: 'test',
         document: { x: 1 }
       };
@@ -470,17 +539,13 @@ describe('routes', () => {
     });
 
     it('should return a data error', async function () { 
-      const body = { ignoreAcception: true };
-      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));  
+      const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());  
       const res = await fetch(`http://${node.address}/api/slave/delete-documents/`, options);
       assert.equal(res.status, 422);
     });
 
     it('should return the right schema', async function () {
-      const body = {
-        ignoreAcception: true,
-        collection: 'test'
-      };
+      const body = { collection: 'test' };
       const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));      
       const res = await fetch(`http://${node.address}/api/slave/delete-documents/`, options);
       const json = tools.createServerResponse(node.address, await res.json());
@@ -504,7 +569,7 @@ describe('routes', () => {
 
     it('should return the right schema', async function () {  
       const body = {
-        ignoreAcception: true,
+        level: 0,
         document: { id: 1 },
         info: {
           collection: 'test'

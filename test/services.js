@@ -16,6 +16,10 @@ describe('services', () => {
     require('./db/loki');    
   });
 
+  describe('collection', () => {
+    require('./collection/collection');
+  });
+
   describe('server', () => {
     require('./server/express');    
   });

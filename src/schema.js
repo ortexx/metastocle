@@ -69,8 +69,7 @@ schema.getDocumentAdditionInfoButlerResponse = function (options = {}) {
       candidates: {
         type: 'array',
         uniq: 'address',
-        items: this.getDocumentAdditionInfoSlaveResponse(options),        
-        maxLength: options.networkOptimum
+        items: this.getDocumentAdditionInfoSlaveResponse(options)
       },
       existing: {
         type: 'array',

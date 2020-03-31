@@ -37,7 +37,7 @@ module.exports.getDocuments = node => {
       const collection = await node.getCollection(collectionName);
       const actions = utils.prepareDocumentGettingActions(req.body.actions || {});
       const options = node.createRequestNetworkOptions(req.body, {   
-        responseSchema: schema.getDocumentsSlaveResponse({ schema: collection.schema })
+        responseSchema: schema.getDocumentsButlerResponse({ schema: collection.schema })
       });
       const results = await node.requestNetwork('get-documents', options);
       
@@ -66,7 +66,7 @@ module.exports.updateDocuments = node => {
       await node.collectionTest(collection); 
       const options = node.createRequestNetworkOptions(req.body, {
         timeout: node.createRequestTimeout(req.body),
-        responseSchema: schema.updateDocumentsSlaveResponse()
+        responseSchema: schema.updateDocumentsButlerResponse()
       });
       const results = await node.requestNetwork('update-documents', options);      
       const updated = results.reduce((p, c) => p + c.updated, 0);
@@ -87,7 +87,7 @@ module.exports.deleteDocuments = node => {
       const collection = req.body.collection;
       await node.collectionTest(collection); 
       const options = node.createRequestNetworkOptions(req.body, {
-        responseSchema: schema.deleteDocumentsSlaveResponse()
+        responseSchema: schema.deleteDocumentsButlerResponse()
       });
       const results = await node.requestNetwork('delete-documents', options);
       const deleted = results.reduce((p, c) => p + c.deleted, 0);

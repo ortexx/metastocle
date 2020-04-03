@@ -80,7 +80,10 @@ const Client = require('metastocle').Client;
 This is only part of the ability to work with collections and documents.
 
 ## Browser client
-You can also use the client in a browser. Look at the description of the [spreadable](https://github.com/ortexx/spreadable/) library. In window you  have __window.ClientMetastocle__ instead of __window.ClientSpreadable__. The prepared file name is __metastocle.client.js__.
+You can also use the client in a browser. Look at the description of the [spreadable](https://github.com/ortexx/spreadable/#how-to-use-the-client-in-a-browser) library. In window you have __window.ClientMetastocle__ instead of __window.ClientSpreadable__. The prepared file name is __metastocle.client.js__.
+
+## How to use it via the command line
+Look at the description of the [spreadable](https://github.com/ortexx/spreadable/#how-to-use-it-via-the-command-line) library. You only need to change everywhere **spreadable** word to **metastocle**.
 
 ## How it works
 

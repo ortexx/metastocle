@@ -1,11 +1,12 @@
 const chalk = require('chalk');
 const argv = require('yargs').argv;
 const utils = require('./utils');
+const actions = Object.assign({}, require('spreadable/bin/actions'));
 
 /**
  * Add the document
  */
-module.exports.addDocument = async node => {
+actions.addDocument = async node => {
   const collection = argv.collection || argv.o;
   const document = JSON.parse(argv.document || argv.d);  
   const result = await node.addDocument(collection, document);
@@ -16,7 +17,7 @@ module.exports.addDocument = async node => {
 /**
  * Get the documents
  */
-module.exports.getDocuments = async node => {
+actions.getDocuments = async node => {
   const collection = argv.collection || argv.o;
   const options = utils.prepareDocumentGettingActions(argv);
   const result = await node.getDocuments(collection, options);
@@ -27,7 +28,7 @@ module.exports.getDocuments = async node => {
 /**
  * Get the documents count
  */
-module.exports.getDocumentsCount = async node => {
+actions.getDocumentsCount = async node => {
   const collection = argv.collection || argv.o;
   const options = utils.prepareDocumentGettingActions(argv);
   const count = await node.getDocumentsCount(collection, options);
@@ -38,7 +39,7 @@ module.exports.getDocumentsCount = async node => {
 /**
  * Get the document by the primary key
  */
-module.exports.getDocumentByPk = async node => {
+actions.getDocumentByPk = async node => {
   const collection = argv.collection || argv.o;
   const pkValue = argv.pkValue || argv.p;
   const document = await node.getDocumentByPk(collection, pkValue);
@@ -54,7 +55,7 @@ module.exports.getDocumentByPk = async node => {
 /**
  * Update the documents
  */
-module.exports.updateDocuments = async node => {
+actions.updateDocuments = async node => {
   const collection = argv.collection || argv.o;
   const document = JSON.parse(argv.document || argv.d); 
   const options = utils.prepareDocumentUpdateActions(argv);  
@@ -66,10 +67,12 @@ module.exports.updateDocuments = async node => {
 /**
  * Delete the documents
  */
-module.exports.deleteDocuments = async node => {
+actions.deleteDocuments = async node => {
   const collection = argv.collection || argv.o;
   const options = utils.prepareDocumentDeletionActions(argv);
   const result = await node.deleteDocuments(collection, options);
   //eslint-disable-next-line no-console
   console.log(chalk.cyan(`${result.deleted} document(s) have been deleted`));
 };
+
+module.exports = actions;

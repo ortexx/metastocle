@@ -93,6 +93,9 @@ Nodes interact via the [spreadable](https://github.com/ortexx/spreadable/) mecha
 
 It is necessary to understand that the library is not a full-fledged database, but a distributed information storage with an interface similar to non-relational databases. It is not optimized for processing large amounts of data on a node. By default, each node uses an in-memory database for storing. The point is to distribute data among a large number of nodes. Therefore, if your project is of this nature, then this solution may work. So you can limit the size of your collections on one node in accordance with the available RAM. But keep in mind, the larger the database, the longer it will be stored in the file. This can lead to delays when working with your application.
 
+## What are the requirements
+Look at the [spreadable requirements](https://github.com/ortexx/spreadable/#what-are-the-requirements).
+
 ## Where to use it
 
 ### 1. Wherever your information need to be stored decentralized

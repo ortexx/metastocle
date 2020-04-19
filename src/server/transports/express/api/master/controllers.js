@@ -41,7 +41,7 @@ module.exports.getDocuments = node => {
       });
       const results = await node.requestNetwork('get-documents', options);
       
-      try {
+      try {        
         res.send(await node.handleDocumentsGettingForMaster(results, actions));
       }
       catch(err) {

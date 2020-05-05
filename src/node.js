@@ -602,7 +602,7 @@ module.exports = (Parent) => {
     }
 
     /**
-     * Choose the documents dublicate
+     * Choose the documents duplicate
      * 
      * @param {array} arr
      * @returns {object|null}
@@ -613,7 +613,7 @@ module.exports = (Parent) => {
     }
 
     /**
-     * Remove the document dublicates
+     * Remove the document duplicates
      * 
      * @param {object[]} documents
      * @returns {object[]}

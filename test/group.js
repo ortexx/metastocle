@@ -6,7 +6,7 @@ const tools = require('./tools');
 describe('group communication', () => {
   let nodes;
   let client;
-  let dublicates;
+  let duplicates;
   let collection;
   let documentAdditionNodeTimeout;
   
@@ -29,7 +29,7 @@ describe('group communication', () => {
     client = new Client(await tools.createClientOptions({ address: nodes[0].address }));
     await client.init();
     await tools.nodesSync(nodes, nodes.length * 2); 
-    dublicates = await nodes[0].getDocumentDuplicatesCount({ collection });
+    duplicates = await nodes[0].getDocumentDuplicatesCount({ collection });
   });
 
   after(async () => {
@@ -53,7 +53,7 @@ describe('group communication', () => {
       (await nodes[i].db.getDocumentByPk(collection, 1)) && count++;
     }
     
-    assert.equal(count, dublicates);
+    assert.equal(count, duplicates);
   });
 
   it('should not add the existent documents again', async () => {
@@ -77,7 +77,7 @@ describe('group communication', () => {
       }
     }
 
-    assert.equal(count, dublicates, 'check the count');
+    assert.equal(count, duplicates, 'check the count');
   });
 
   it('should add the remaining duplicates', async () => {
@@ -110,7 +110,7 @@ describe('group communication', () => {
       }
     }
 
-    assert.equal(count, dublicates, 'check the count');
+    assert.equal(count, duplicates, 'check the count');
   });
 
   it('should update the documents', async () => {
@@ -126,7 +126,7 @@ describe('group communication', () => {
       }
     }
 
-    assert.equal(count, dublicates, 'check the count');
+    assert.equal(count, duplicates, 'check the count');
   });
 
   it('should get the documents without duplicates', async () => {
@@ -166,6 +166,6 @@ describe('group communication', () => {
       count += (await nodes[i].db.getDocuments(collection)).length;
     }
 
-    assert.isOk(count == length * dublicates);
+    assert.isOk(count == length * duplicates);
   });
 });

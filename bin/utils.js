@@ -13,7 +13,7 @@ utils.prepareDocumentGettingActions = function (argv) {
   const fields = argv.fields || argv.x;
   const limit = argv.limit || argv.y;
   const offset = argv.offset || argv.z;
-  const removeDublicates = argv.removeDublicates || argv.w;
+  const removeDuplicates = argv.removeDuplicates || argv.w;
 
   return scrUtils.prepareDocumentGettingActions({
     filter: filter? JSON.parse(filter): null,
@@ -21,7 +21,7 @@ utils.prepareDocumentGettingActions = function (argv) {
     fields: fields? JSON.parse(fields): null,
     limit,
     offset,
-    removeDublicates
+    removeDuplicates
   });
 };
 

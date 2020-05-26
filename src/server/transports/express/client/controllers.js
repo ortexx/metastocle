@@ -6,7 +6,6 @@ module.exports.addDocument = node => {
     try {
       const collection = req.body.collection;
       let document = req.body.document;
-      await node.collectionTest(collection); 
       document = await node.addDocument(collection, document, node.prepareClientMessageOptions(req.body));
       res.send({ document });
     }
@@ -25,7 +24,6 @@ module.exports.updateDocuments = node => {
       const collection = req.body.collection;
       const document = req.body.document;
       const actions = req.body.actions || {};
-      await node.collectionTest(collection); 
       const result = await node.updateDocuments(collection, document, node.prepareClientMessageOptions(req.body, actions));
       res.send(result);
     }
@@ -43,7 +41,6 @@ module.exports.deleteDocuments = node => {
     try {
       const collection = req.body.collection;
       const actions = req.body.actions || {};
-      await node.collectionTest(collection);
       const result = await node.deleteDocuments(collection, node.prepareClientMessageOptions(req.body, actions));
       res.send(result);
     }
@@ -61,7 +58,6 @@ module.exports.getDocuments = node => {
     try {
       const collection = req.body.collection;
       const actions = req.body.actions || {};
-      await node.collectionTest(collection); 
       const result = await node.getDocuments(collection, node.prepareClientMessageOptions(req.body, actions));
       res.send(result);
     }
@@ -79,7 +75,6 @@ module.exports.getDocumentsCount = node => {
     try {
       const collection = req.body.collection;
       const actions = req.body.actions || {};
-      await node.collectionTest(collection); 
       const count = await node.getDocumentsCount(collection, node.prepareClientMessageOptions(req.body, actions));
       res.send({ count });
     }
@@ -97,7 +92,6 @@ module.exports.getDocumentByPk = node => {
     try {
       const collection = req.body.collection;
       const pkValue = req.body.pkValue;
-      await node.collectionTest(collection); 
       const document = await node.getDocumentByPk(collection, pkValue, node.prepareClientMessageOptions(req.body));
       res.send({ document });
     }

@@ -10,7 +10,7 @@ describe('DatabaseLokiMetastocle', () => {
   describe('instance creation', function () {
     it('should create an instance', function () { 
       assert.doesNotThrow(() => loki = new DatabaseLokiMetastocle(this.node, {
-        filename: tools.getDbFilePath(this.node.port)
+        filename: tools.getDbFilePath(this.node)
       }));    
       lastNodeDb = this.node.db;
       this.node.db = loki;
@@ -23,7 +23,7 @@ describe('DatabaseLokiMetastocle', () => {
     });  
     
     it('should create the db file', async function () {    
-      assert.isTrue(await fse.exists(tools.getDbFilePath(this.node.port)));
+      assert.isTrue(await fse.pathExists(tools.getDbFilePath(this.node)));
     });
   });  
 
@@ -486,7 +486,7 @@ describe('DatabaseLokiMetastocle', () => {
     });
     
     it('should remove the db file', async function () {
-      assert.isFalse(await fse.exists(tools.getDbFilePath(this.node.port)));
+      assert.isFalse(await fse.pathExists(tools.getDbFilePath(this.node)));
     });
   });
 });

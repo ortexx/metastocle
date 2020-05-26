@@ -1,3 +1,1 @@
-const tools = Object.assign({}, require('spreadable/test/tools'));
-
-module.exports = tools;
+module.exports = Object.assign({}, require('spreadable/test/tools'));

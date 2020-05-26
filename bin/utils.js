@@ -14,7 +14,6 @@ utils.prepareDocumentGettingActions = function (argv) {
   const limit = argv.limit || argv.y;
   const offset = argv.offset || argv.z;
   const removeDuplicates = argv.removeDuplicates || argv.w;
-
   return scrUtils.prepareDocumentGettingActions({
     filter: filter? JSON.parse(filter): null,
     sort: sort? JSON.parse(sort): null,
@@ -34,7 +33,6 @@ utils.prepareDocumentGettingActions = function (argv) {
 utils.prepareDocumentUpdateActions = function (argv) {
   const filter = argv.filter || argv.f;
   const replace = argv.replace || argv.r;
-
   return scrUtils.prepareDocumentUpdateActions({
     filter: filter? JSON.parse(filter): null,
     replace
@@ -49,7 +47,6 @@ utils.prepareDocumentUpdateActions = function (argv) {
  */
 utils.prepareDocumentDeletionActions = function (argv) {
   const filter = argv.filter || argv.f;
-
   return scrUtils.prepareDocumentUpdateActions({
     filter: filter? JSON.parse(filter): null
   });

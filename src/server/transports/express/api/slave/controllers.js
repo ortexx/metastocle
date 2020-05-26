@@ -31,18 +31,15 @@ module.exports.getDocumentAdditionInfo = node => {
 module.exports.getDocuments = node => {
   return async (req, res, next) => {
     try {      
-      const collection = req.body.collection;
       const isCounting = req.body.isCounting;
-      await node.collectionTest(collection); 
-      let documents = await node.db.getDocuments(collection);
-      const actions = utils.prepareDocumentGettingActions(req.body.actions || {});
-      const result = await node.handleDocumentsGettingForSlave(documents, actions);
+      let documents = await node.db.getDocuments(req.collection.name);
+      const result = await node.handleDocumentsGettingForSlave(documents, req.actions);
 
       if(isCounting) {
         documents = _.pick(result.documents, '$duplicate');
       }
       else {
-        documents = await node.db.accessDocuments(collection, result.accessDocuments);
+        documents = await node.db.accessDocuments(req.collection.name, result.accessDocuments);
         documents = result.documents.map(d => node.db.removeDocumentSystemFields(d, ['$duplicate']));
       }
       
@@ -59,15 +56,10 @@ module.exports.getDocuments = node => {
  */
 module.exports.updateDocuments = node => {
   return async (req, res, next) => {
-    try {      
-      const collection = req.body.collection;
-      const document = req.body.document;
-      await node.documentTest(document);  
-      await node.checkCollection(collection);
-      let documents = await node.db.getDocuments(collection);
-      const actions = utils.prepareDocumentUpdateActions(req.body.actions || {});      
-      const result = await node.handleDocumentsUpdate(documents, document, actions);
-      documents = await node.db.updateDocuments(collection, result.documents);      
+    try {
+      let documents = await node.db.getDocuments(req.collection.name);    
+      const result = await node.handleDocumentsUpdate(documents, req.document, req.actions);
+      documents = await node.db.updateDocuments(req.collection.name, result.documents);      
       res.send({ updated: result.documents.length });
     }
     catch(err) {

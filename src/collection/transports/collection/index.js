@@ -1,10 +1,11 @@
 const Service = require('spreadable/src/service')();
+const utils = require('../../../utils');
 
 module.exports = (Parent) => {
   /**
    * Behavior transport
    */
-  return class Collecion extends (Parent || Service) {
+  return class Collection extends (Parent || Service) {
     /**
      * @param {Node} node 
      * @param {object} [options]
@@ -15,11 +16,10 @@ module.exports = (Parent) => {
       this.options = Object.assign(this, {        
         pk: '',
         limit: 0,
-        queue: false,          
+        queue: false,
         preferredDuplicates: "auto",
-        limitationOrder: '$accessedAt'        
+        limitationOrder: '$accessedAt'
       }, options);
-
       this.schema = node.createDocumentFullSchema(this.schema);
     }
 
@@ -38,5 +38,33 @@ module.exports = (Parent) => {
       await this.node.db.removeCollection(this.name);
       await super.destroy.apply(this, arguments);
     }
+
+    /**
+     * The actions update test
+     */
+    async actionsUpdateTest(actions) {
+      this.actionsTypeTest(actions);
+    }
+
+    /**
+     * The actions getting test
+     */
+    async actionsGettingTest(actions) {
+      this.actionsTypeTest(actions);
+    }
+
+    /**
+     * The actions deletion test
+     */
+    async actionsDeletionTest(actions) {
+      this.actionsTypeTest(actions);
+    }
+
+    /**
+     * The actions type test
+     */
+    actionsTypeTest(actions) {
+      utils.actionsTest(actions);      
+    }   
   }
 };

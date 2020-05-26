@@ -28,7 +28,6 @@ module.exports = (Parent) => {
         },
         collections: {},
       }, options);
-
       super(options); 
       this.__collections = {};
     }
@@ -156,7 +155,7 @@ module.exports = (Parent) => {
      */
     async collectionTest(name) {
       if(!await this.getCollection(name))    {
-        throw new errors.WorkError(`Collection ${name} doesn't exist`, 'ERR_METASTOCLE_NOT_FOUND_COLLECTION');
+        throw new errors.WorkError(`Collection ${ name } doesn't exist`, 'ERR_METASTOCLE_NOT_FOUND_COLLECTION');
       }
     }
 
@@ -167,7 +166,7 @@ module.exports = (Parent) => {
      */
     async documentTest(document) {
       if(!utils.isDocument(document)) {
-        throw new errors.WorkError(`Invalid document`, 'ERR_METASTOCLE_INVALID_DOCUMENT');
+        throw new errors.WorkError(`Invalid document: ${ JSON.stringify(document, null, 1) }`, 'ERR_METASTOCLE_INVALID_DOCUMENT');
       }  
     }
 
@@ -195,11 +194,7 @@ module.exports = (Parent) => {
         const data = JSON.stringify(document, null, 1);
         throw new errors.WorkError(`Document ${ data } already exists`, 'ERR_METASTOCLE_DOCUMENT_EXISTS');
       }
-
-      if(!utils.isDocument(document)) {
-        throw new errors.WorkError(`Wrong document: ${JSON.stringify(document, null, 1)}`, 'ERR_METASTOCLE_WRONG_DOCUMENT');
-      }
-      
+      await this.documentTest(document);
       await this.collectionTest(collectionName); 
       const timer = this.createRequestTimer(options.timeout);
       const collection = await this.getCollection(collectionName);
@@ -239,7 +234,7 @@ module.exports = (Parent) => {
 
       document = this.extractDocumentExistenceInfo(existing) || document;
       document = _.merge(this.prepareDocumentToAdd(document), { $duplicate: document.$duplicate });
-      await this.db.addBehaviorCandidate('addDocument', candidates[0].address);      
+      await this.db.addBehaviorCandidate('addDocument', candidates[0].address);     
       const servers = candidates.map(c => c.address).sort(await this.createAddressComparisonFunction());
       const result = await this.duplicateDocument(servers, document, info, { timeout: timer() });
       
@@ -264,13 +259,12 @@ module.exports = (Parent) => {
      * @returns {object}
      */
     async updateDocuments(collectionName, document, options = {}) {
-      if(!utils.isDocument(document)) {
-        throw new errors.WorkError(`Wrong document: ${JSON.stringify(document, null, 1)}`, 'ERR_METASTOCLE_WRONG_DOCUMENT');
-      }
-
+      await this.documentTest(document);
       await this.collectionTest(collectionName);
+      const collection = await this.getCollection(collectionName);
       document = this.prepareDocumentToUpdate(document);
       const actions = utils.prepareDocumentUpdateActions(options);
+      await collection.actionsUpdateTest(actions);
       const results =  await this.requestNetwork('update-documents', {
         body: { actions, collection: collectionName, document },
         timeout: options.timeout,
@@ -290,7 +284,9 @@ module.exports = (Parent) => {
      */
     async deleteDocuments(collectionName, options = {}) {
       await this.collectionTest(collectionName);
+      const collection = await this.getCollection(collectionName);
       const actions = utils.prepareDocumentUpdateActions(options);
+      await collection.actionsDeletionTest(actions);
       const results = await this.requestNetwork('delete-documents', {
         body: { actions, collection: collectionName },
         timeout: options.timeout,
@@ -312,6 +308,7 @@ module.exports = (Parent) => {
       await this.collectionTest(collectionName);
       const collection = await this.getCollection(collectionName);
       const actions = utils.prepareDocumentGettingActions(options);
+      await collection.actionsGettingTest(actions);
       const results = await this.requestNetwork('get-documents', {
         body: { actions, collection: collectionName },
         timeout: options.timeout,

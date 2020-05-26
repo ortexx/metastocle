@@ -1,6 +1,6 @@
 {
   "name": "metastocle",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Decentralized data storage",
   "main": "./src/index.js",
   "bin": {
@@ -44,17 +44,17 @@
     "chai": "^4.2.0",
     "eslint": "^5.16.0",
     "husky": "^4.2.5",
-    "mocha": "^7.1.1",
-    "terser-webpack-plugin": "^2.2.2",
-    "webpack": "^4.41.5",
+    "mocha": "^7.2.0",
+    "terser-webpack-plugin": "^2.3.6",
+    "webpack": "^4.43.0",
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
     "chalk": "^3.0.0",
-    "fs-extra": "^8.1.0",
+    "fs-extra": "^9.0.0",
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
-    "spreadable": ">=0.1.14",
+    "spreadable": ">=0.1.15",
     "uuid": "^3.3.3",
     "yargs": "^15.3.1"
   },

@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const errors = require('../../../../../errors');
 const schema = require('../../../../../schema');
-const utils = require('../../../../../utils');
 
 /**
  * Get candidates to add the document
@@ -31,18 +30,14 @@ module.exports.getDocumentAdditionInfo = node => {
  */
 module.exports.getDocuments = node => {
   return async (req, res, next) => {    
-    try {      
-      const collectionName = req.body.collection;
-      await node.collectionTest(collectionName);  
-      const collection = await node.getCollection(collectionName);
-      const actions = utils.prepareDocumentGettingActions(req.body.actions || {});
+    try {
       const options = node.createRequestNetworkOptions(req.body, {   
-        responseSchema: schema.getDocumentsSlaveResponse({ schema: collection.schema })
+        responseSchema: schema.getDocumentsSlaveResponse({ schema: req.collection.schema })
       });
       const results = await node.requestNetwork('get-documents', options);
       
       try {
-        res.send(await node.handleDocumentsGettingForButler(results, actions));
+        res.send(await node.handleDocumentsGettingForButler(results, req.actions));
       }
       catch(err) {
         throw new errors.WorkError(err.message, 'ERR_METASTOCLE_DOCUMENTS_HANDLER');
@@ -59,11 +54,7 @@ module.exports.getDocuments = node => {
  */
 module.exports.updateDocuments = node => {
   return async (req, res, next) => {
-    try {      
-      const collection = req.body.collection;
-      const document = req.body.document;
-      await node.documentTest(document); 
-      await node.collectionTest(collection); 
+    try {
       const options = node.createRequestNetworkOptions(req.body, {
         timeout: node.createRequestTimeout(req.body),
         responseSchema: schema.updateDocumentsSlaveResponse()
@@ -83,9 +74,7 @@ module.exports.updateDocuments = node => {
  */
 module.exports.deleteDocuments = node => {
   return async (req, res, next) => {
-    try {      
-      const collection = req.body.collection;
-      await node.collectionTest(collection); 
+    try {
       const options = node.createRequestNetworkOptions(req.body, {
         responseSchema: schema.deleteDocumentsSlaveResponse()
       });

@@ -1,5 +1,5 @@
-
 const controllers = require('./controllers');
+const midds = require('../../midds');
 
 module.exports = [
   /**
@@ -28,7 +28,11 @@ module.exports = [
     name: 'getDocuments',
     method: 'post', 
     url: '/get-documents', 
-    fn: controllers.getDocuments
+    fn: [
+      midds.prepareCollection,
+      midds.prepareGettingActions,
+      controllers.getDocuments
+    ]
   },
 
   /**
@@ -41,7 +45,11 @@ module.exports = [
     name: 'updateDocuments',
     method: 'post', 
     url: '/update-documents', 
-    fn: controllers.updateDocuments
+    fn: [
+      midds.prepareCollection,
+      midds.prepareUpdateActions,
+      controllers.updateDocuments
+    ]
   },
 
   /**
@@ -54,7 +62,11 @@ module.exports = [
     name: 'deleteDocuments',
     method: 'post', 
     url: '/delete-documents', 
-    fn: controllers.deleteDocuments
+    fn: [
+      midds.prepareCollection,
+      midds.prepareDeletionActions,
+      controllers.deleteDocuments
+    ]
   }
 ];
 

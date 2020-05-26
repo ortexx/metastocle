@@ -573,6 +573,18 @@ utils.isActions = function (actions) {
 }
 
 /**
+ * Test the actions are right
+ * 
+ * @param {*} actions
+ */
+utils.actionsTest = function (actions) {
+  if(!this.isActions(actions)) {
+    const msg =`Wrong actions: ${ JSON.stringify(actions, null, 1) }`;
+    throw new errors.WorkError(msg, 'ERR_METASTOCLE_WRONG_DOCUMENT_ACTIONS');
+  }
+}
+
+/**
  * Prepare the document filter
  * 
  * @param {object} filter
@@ -615,7 +627,7 @@ utils.prepareDocumentFilter = function (filter) {
  * Prepare the document fields
  * 
  * @param {object} fields
- * @returns {object} 
+ * @returns {object}
  */
 utils.prepareDocumentFields = function (fields) {
   if(!fields || typeof fields != 'object') {
@@ -644,14 +656,10 @@ utils.prepareDocumentFields = function (fields) {
  * Prepare the document getting actions
  * 
  * @param {object} actions
- * @returns {object} 
+ * @returns {object}
  */
 utils.prepareDocumentGettingActions = function (actions) {
-  if(!this.isActions(actions)) {
-    const msg =`Wrong actions: ${JSON.stringify(actions, null, 1)}`;
-    throw new errors.WorkError(msg, 'ERR_METASTOCLE_WRONG_DOCUMENT_ACTIONS');
-  }
-
+  this.actionsTest(actions);
   return merge({
     sort: null,
     fields: null,
@@ -667,14 +675,10 @@ utils.prepareDocumentGettingActions = function (actions) {
  * Prepare the document update actions
  * 
  * @param {object} actions
- * @returns {object} 
+ * @returns {object}
  */
 utils.prepareDocumentUpdateActions = function (actions) {
-  if(!this.isActions(actions)) {
-    const msg =`Wrong actions: ${JSON.stringify(actions, null, 1)}`;
-    throw new errors.WorkError(msg, 'ERR_METASTOCLE_WRONG_DOCUMENT_ACTIONS');
-  }
-
+  this.actionsTest(actions);
   return merge({
     replace: false,
   }, pick(actions, ['replace', 'filter']), {
@@ -686,14 +690,10 @@ utils.prepareDocumentUpdateActions = function (actions) {
  * Prepare the document deletion actions
  * 
  * @param {object} actions
- * @returns {object} 
+ * @returns {object}
  */
 utils.prepareDocumentDeletionActions = function (actions) {
-  if(!this.isActions(actions)) {
-    const msg =`Wrong actions: ${JSON.stringify(actions, null, 1)}`;
-    throw new errors.WorkError(msg, 'ERR_METASTOCLE_WRONG_DOCUMENT_ACTIONS');
-  }
-
+  this.actionsTest(actions);
   return merge({}, pick(actions, ['filter']), {
     filter: actions.filter? utils.prepareDocumentFilter(actions.filter): null
   });

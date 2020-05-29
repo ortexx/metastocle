@@ -31,8 +31,9 @@ module.exports.getDocumentAdditionInfo = node => {
 module.exports.getDocuments = node => {
   return async (req, res, next) => {    
     try {
+      const isCounting = req.body.isCounting;
       const options = node.createRequestNetworkOptions(req.body, {   
-        responseSchema: schema.getDocumentsButlerResponse({ schema: req.collection.schema })
+        responseSchema: schema.getDocumentsButlerResponse({ schema: req.collection.schema, isCounting })
       });
       const results = await node.requestNetwork('get-documents', options);
       

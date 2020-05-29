@@ -10,8 +10,7 @@ module.exports.getDocumentAdditionInfo = node => {
       const info = req.body.info || {};
       await node.collectionTest(info.collection); 
       const testInfo = Object.assign({}, info);
-      testInfo.count = await node.db.getCollectionSize(info.collection);
-      
+      testInfo.count = await node.db.getCollectionSize(info.collection);      
       res.send({ 
         count: testInfo.count,
         existenceInfo: await node.getDocumentExistenceInfo(testInfo),
@@ -32,11 +31,21 @@ module.exports.getDocuments = node => {
   return async (req, res, next) => {
     try {      
       const isCounting = req.body.isCounting;
-      let documents = await node.db.getDocuments(req.collection.name);
+      const pkValue =  req.body.pkValue;
+      let documents = [];
+
+      if(pkValue) {
+        const document = await node.db.getDocumentByPk(req.collection.name, pkValue);
+        document && documents.push(document);
+      }
+      else {
+        documents = await node.db.getDocuments(req.collection.name);
+      }
+
       const result = await node.handleDocumentsGettingForSlave(documents, req.actions);
 
       if(isCounting) {
-        documents = _.pick(result.documents, '$duplicate');
+        documents = result.documents.map(d => _.pick(d, '$duplicate'));
       }
       else {
         documents = await node.db.accessDocuments(req.collection.name, result.accessDocuments);

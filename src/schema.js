@@ -112,6 +112,17 @@ schema.getDocumentsButlerResponse = function (options) {
 
 schema.getDocumentsSlaveResponse = function (options = {}) {
   const address = this.getAddress();
+  let items = options.schema || { type: 'object' };
+
+  if(options.isCounting) {
+    items = { 
+      type: 'object', 
+      props: { 
+        $duplicate: 'string' 
+      },
+      strong: true
+    }
+  }
 
   return {
     type: 'object',
@@ -119,7 +130,7 @@ schema.getDocumentsSlaveResponse = function (options = {}) {
       address,
       documents: {
         type: 'array',
-        items: options.schema || { type: 'object' }
+        items
       }
     },
     strict: true

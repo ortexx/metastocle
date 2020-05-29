@@ -308,11 +308,13 @@ module.exports = (Parent) => {
       await this.collectionTest(collectionName);
       const collection = await this.getCollection(collectionName);
       const actions = utils.prepareDocumentGettingActions(options);
+      const isCounting = options.isCounting;
+      const pkValue = options.pkValue;
       await collection.actionsGettingTest(actions);
       const results = await this.requestNetwork('get-documents', {
-        body: { actions, collection: collectionName },
+        body: { actions, collection: collectionName, isCounting, pkValue },
         timeout: options.timeout,
-        responseSchema: schema.getDocumentsMasterResponse({ schema: collection.schema })
+        responseSchema: schema.getDocumentsMasterResponse({ schema: collection.schema, isCounting })
       });
       return await this.handleDocumentsGettingForClient(results, actions);
     }
@@ -327,12 +329,11 @@ module.exports = (Parent) => {
      * @returns {object|null}
      */
     async getDocumentByPk(collectionName, pkValue, options = {}) {      
-      await this.collectionTest(collectionName);
-      const collection = await this.getCollection(collectionName);      
+      await this.collectionTest(collectionName);      
       options = Object.assign({}, options, {
-        filter: { [collection.pk]: pkValue },
         limit: 1,
-        offset: 0
+        offset: 0,
+        pkValue
       });
       const res = await this.getDocuments(collectionName, options);    
       return res.documents.length? res.documents[0]: null;

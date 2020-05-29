@@ -89,6 +89,16 @@ module.exports = (Parent) => {
     }
 
     /**
+     * Empty the collection
+     * 
+     * @async
+     * @param {string} name
+     */
+    async emptyCollection() {
+      throw new Error('Method "emptyCollection" is required for database transport');
+    }
+
+    /**
      * Get the collection
      * 
      * @async

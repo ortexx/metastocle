@@ -116,7 +116,7 @@ When you create an instance of the node you can pass options below. Only specifi
 
 In production, collections should only be created before the node is initialized! Any collection is an instance of the __Collection__ class. When you add a new collection you can pass the options:
 
-* {object} __[pk='']__ - default primary key field. If collection has a primary key you can't add two documents with the same value in the pk field.
+* {integer|string} __[pk='']__ - default primary key field. If collection has a primary key you can't add two documents with the same value in the pk field.
 
 * {integer} __[limit=0]__ - default documents limit for collection. If it is zero then there is no limits. 
 
@@ -124,7 +124,61 @@ In production, collections should only be created before the node is initialized
 
 * {string|string[]|array[]} __[limitationOrder="$accessedAt"]__ - sorting procedure for documents to be deleted if the limit is exceeded.
 
+* {object} __[schema]__ - document fields structure
+
+* {object} __[defaults]__ - default values for document fields. Each property value can be a function.
+
+* {object} __[hooks]__ - hooks for document fields. It is called on any document change. Each property value can be a function.
+ 
 * {integer|string} __[preferredDuplicates="auto"]__ - preferred number of documents copies on the network. If indicated in percent, the calculation will be based on the network size. If the option is "auto" it will be calculated as `Math.ceil(Math.sqrt(networkSize))`.
+
+## Fields schema
+
+If you need to have a strict field structure, then it can be defined as:
+
+``` 
+{ 
+  type: 'object',
+  props: {
+    count: 'number',
+    title: 'string',
+    description: { type: 'string' },
+    priority: {
+      type: 'number',
+      value: val => val >= -1 && val <= 1
+    },
+    goods: {
+      type: 'array',
+      items: {
+        type: 'object',
+        props: {
+          title: 'string',
+          isAble: 'boolean'
+        }
+      }
+    }
+  }
+} 
+```
+
+## Defaults and hooks
+
+Defaults work only if the values are __undefined__. Hooks are used anyway.
+
+``` 
+{ 
+  defaults: {
+    date: Date.now
+    priority: 0
+    'nested.prop': (key, doc) => Date.now() - doc.date
+  },
+  hooks: {
+    priority: (val, key, doc, prevDoc) => prevDoc? prevDoc.priority + 1: val
+  }
+}
+```
+
+This kind of a schema is handled by [utils.validateSchema](https://github.com/ortexx/spreadable/blob/master/src/utils.js) function, where you can find all the rules.
 
 ## Client configuration
 

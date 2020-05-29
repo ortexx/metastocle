@@ -94,6 +94,20 @@ describe('DatabaseLokiMetastocle', () => {
     });
   });
 
+  describe('.emptyCollection()', function () { 
+    it('should empty the collection', async function () {
+      const name = 'test';
+      const collection = await loki.getCollection(name);
+
+      for(let i = 0; i < 5; i++) {
+        await collection.insert({ x: i + 1 });
+      }
+      
+      await loki.emptyCollection(name);
+      assert.equal(collection.count(), 0);
+    });
+  });
+
   describe('.removeCollection()', function () { 
     it('should remove the collection', async function () {
       const name = 'test';
@@ -102,7 +116,7 @@ describe('DatabaseLokiMetastocle', () => {
       assert.isNotOk(loki.loki.getCollection(fullName), 'check the interface');
       assert.isNotOk(loki.col[fullName], 'check the loki db collection');
     });
-  });
+  });  
 
   describe('.normalizeCollections()', function () { 
     let col;
@@ -268,7 +282,7 @@ describe('DatabaseLokiMetastocle', () => {
           z: () => 1,
           x: 1
         },
-        always: {
+        hooks: {
           d: () => 1,
           t: 1
         }
@@ -353,7 +367,7 @@ describe('DatabaseLokiMetastocle', () => {
       assert.equal(doc.x, 1, 'check without a function');
     });
 
-    it('should handle the always fields', async function () {
+    it('should handle the hook fields', async function () {
       const doc = await loki.handleDocument({ $collection, t: 2, d: 2 });
       assert.equal(doc.d, 1, 'check with a function');
       assert.equal(doc.t, 1, 'check without a function');

@@ -14,7 +14,6 @@ module.exports = (Parent) => {
       options = _.merge({
         metaPrefix: 'meta'
       }, options);
-
       super(node, options);
     }
 
@@ -64,15 +63,14 @@ module.exports = (Parent) => {
      * @see DatabaseMetastocle.prototype.addCollection
      */
     async addCollection(name, options = {}) {
-      const fullName = this.createCollectionName(name);
-      this.col[fullName] = this.loki.getCollection(fullName);
-      
-      if (this.col[fullName] === null) {
-        const lokiOptions = _.merge({ disableMeta: true }, options.loki);
-        options.pk && !lokiOptions.unique && (lokiOptions.unique = [options.pk]);
-        this.col[fullName] = this.loki.addCollection(fullName, lokiOptions);
-      }
+      const lokiOptions = Object.assign({}, options.loki || {});
 
+      if(options.pk) {
+        !lokiOptions.unique && (lokiOptions.unique = []);
+        !lokiOptions.unique.includes(options.pk) && (lokiOptions.unique.push(options.pk));
+      }  
+      const fullName = this.createCollectionName(name);
+      this.col[fullName] = this.prepareCollection(fullName, lokiOptions);
       return this.col[fullName];
     }
 
@@ -90,6 +88,13 @@ module.exports = (Parent) => {
       const fullName = this.createCollectionName(name);
       this.loki.removeCollection(fullName);
       delete this.col[fullName];
+    }
+
+    /**
+     * @see DatabaseMetastocle.prototype.emptyCollection
+     */
+    async emptyCollection(name) {
+      this.col[this.createCollectionName(name)].clear();
     }
 
     /**
@@ -195,7 +200,8 @@ module.exports = (Parent) => {
       }
 
       const fullName = this.createCollectionName(document.$collection);
-      const collection = await this.node.getCollection(document.$collection);  
+      const collection = await this.node.getCollection(document.$collection);
+      const prev = options.prevState || null;  
 
       if(collection.defaults) {
         for(let key in collection.defaults) {
@@ -205,14 +211,14 @@ module.exports = (Parent) => {
             continue;
           }
 
-          _.set(document, key, typeof value == 'function'? value(key, document): value);
+          _.set(document, key, typeof value == 'function'? value(key, document, prev): value);
         }
       }
 
-      if(collection.always) {
-        for(let key in collection.always) {
-          const value = collection.always[key];
-          _.set(document, key, typeof value == 'function'? value(_.get(document, key), key, document): value);
+      if(collection.hooks) {
+        for(let key in collection.hooks) {
+          const value = collection.hooks[key];
+          _.set(document, key, typeof value == 'function'? value(_.get(document, key), key, document, prev): value);
         }
       }
 
@@ -260,7 +266,7 @@ module.exports = (Parent) => {
     async getDocumentByPk(name, value) {
       const fullName = this.createCollectionName(name);
       const collection = await this.node.getCollection(name);
-      const document = this.col[fullName].findOne({ [collection.pk]: value });
+      const document = this.col[fullName].by(collection.pk, value);
       return document? this.prepareDocumentToGet(document): null;
     }
 
@@ -297,8 +303,10 @@ module.exports = (Parent) => {
      * @see DatabaseMetastocle.prototype.updateDocument
      */
     async updateDocument(document, options = {}) {
+      options = Object.assign({}, options);
       const fullName = this.createCollectionName(document.$collection);
       document.$updatedAt = document.$accessedAt = Date.now();
+      options.prevState = this.col[fullName].get(document.$loki);
       document = await this.handleDocument(document, options);
       this.col[fullName].update(document);
       return this.prepareDocumentToGet(document);

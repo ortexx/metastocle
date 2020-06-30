@@ -1,7 +1,6 @@
 # [Metastocle](https://github.com/ortexx/metastocle/) [alpha] [![npm version](https://badge.fury.io/js/metastocle.svg)](https://badge.fury.io/js/metastocle)
 
-Metastocle is a decentralized data storage based on
-the [spreadable](https://github.com/ortexx/spreadable/) protocol.
+Metastocle is a decentralized data storage based on [the spreadable protocol](https://github.com/ortexx/spreadable/).
 
 ```javascript
 const Node = require('metastocle').Node;
@@ -79,26 +78,26 @@ const Client = require('metastocle').Client;
 This is only part of the ability to work with collections and documents.
 
 ## Browser client
-You can also use the client in a browser. Look at the description of the [spreadable](https://github.com/ortexx/spreadable/#how-to-use-the-client-in-a-browser) library. In window you have __window.ClientMetastocle__ instead of __window.ClientSpreadable__. The prepared file name is __metastocle.client.js__.
+You can also use the client in a browser. Look at the description of [the spreadable library](https://github.com/ortexx/spreadable/#how-to-use-the-client-in-a-browser). In window you have __window.ClientMetastocle__ instead of __window.ClientSpreadable__. The prepared file name is __metastocle.client.js__.
 
 ## How to use it via the command line
-Look at the description of the [spreadable](https://github.com/ortexx/spreadable/#how-to-use-it-via-the-command-line) library. You only need to change everywhere **spreadable** word to **metastocle**.
+Look at the description of [the spreadable library](https://github.com/ortexx/spreadable/#how-to-use-it-via-the-command-line). You only need to change everywhere **spreadable** word to **metastocle**.
 
 ## How it works
 
-Nodes interact via the [spreadable](https://github.com/ortexx/spreadable/) mechanism. The data can be added to the network through any node. You can create collection and put documents into them. There are various __CRUD__ document management methods. For better reliability documents can be duplicated. How exactly you can customize yourself. By default, each one tends to have its copies in amount of __Math.ceil(Math.sqrt(networkSize))__.
+Nodes interact via [the spreadable mechanism](https://github.com/ortexx/spreadable/). The data can be added to the network through any node. You can create collection and put documents into them. There are various __CRUD__ document management methods. For better reliability documents can be duplicated. How exactly you can customize yourself. By default, each one tends to have its copies in amount of __Math.ceil(Math.sqrt(networkSize))__.
 
 ## What are the limitations
 
 It is necessary to understand that the library is not a full-fledged database, but a distributed information storage with an interface similar to non-relational databases. It is not optimized for processing large amounts of data on a node. By default, each node uses an in-memory database for storing. The point is to distribute data among a large number of nodes. Therefore, if your project is of this nature, then this solution may work. So you can limit the size of your collections on one node in accordance with the available RAM. But keep in mind, the larger the database, the longer it will be stored in the file. This can lead to delays when working with your application.
 
 ## What are the requirements
-Look at the [spreadable requirements](https://github.com/ortexx/spreadable/#what-are-the-requirements).
+Look at [the spreadable requirements](https://github.com/ortexx/spreadable/#what-are-the-requirements).
 
 ## Where to use it
 
 ### 1. Wherever your information need to be stored decentralized
-For example, you can link this library to the [storacle](https://github.com/ortexx/storacle/) and save links to files as well as additional metadata.
+For example, you can link this library to [the storacle](https://github.com/ortexx/storacle/) and save links to files as well as additional metadata.
 
 ### 2. For own needs
 Storing information of your own projects, websites, etc. The network can be made private.
@@ -252,7 +251,7 @@ As we found out earlier you can filter documents. Filters can be nested in each 
 
 ``` 
 { 
-  a: { lt: 1 },
+  a: { $lt: 1 },
   $and: [
     { x: 1 },
     { y: { $gt: 2 } },

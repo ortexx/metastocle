@@ -13,27 +13,7 @@ module.exports = (Parent) => {
      */
     createCollectionName() {
       throw new Error('Method "createCollectionName" is required for database transport');
-    }
-
-    /**
-     * Prepare the document for addition
-     * 
-     * @param {object} document
-     * @returns {object}
-     */
-    prepareDocumentToAdd() {
-      throw new Error('Method "prepareDocumentToAdd" is required for database transport');
-    }
-
-    /**
-     * Prepare the document for getting
-     * 
-     * @param {object} document
-     * @returns {object}
-     */
-    prepareDocumentToGet() {
-      throw new Error('Method "prepareDocumentToGet" is required for database transport');
-    }
+    }    
 
     /**
      * Create the document primary key
@@ -137,6 +117,29 @@ module.exports = (Parent) => {
      */
     async getCollectionSize() {
       throw new Error('Method "getCollectionSize" is required for database transport');
+    }
+
+    /**
+     * Prepare the document for setting
+     * 
+     * @async
+     * @param {object} document
+     * @param {object} [prevDocument=null]
+     * @returns {object}
+     */
+    async prepareDocumentToSet() {
+      throw new Error('Method "prepareDocumentToSet" is required for database transport');
+    }
+
+    /**
+     * Prepare the document for getting
+     * 
+     * @async
+     * @param {object} document
+     * @returns {object}
+     */
+    async repareDocumentToGet() {
+      throw new Error('Method "prepareDocumentToGet" is required for database transport');
     }
 
     /**

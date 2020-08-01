@@ -127,7 +127,9 @@ In production, collections should only be created before the node is initialized
 
 * {object} __[defaults]__ - default values for document fields. Each property value can be a function.
 
-* {object} __[hooks]__ - hooks for document fields. It is called on any document change. Each property value can be a function.
+* {object} __[setters]__ - setters for document fields. It is called on any document change. Each property value can be a function.
+
+* {object} __[getters]__ - getters for document fields. It is called on any document receiving. Each property value can be a function.
  
 * {integer|string} __[preferredDuplicates="auto"]__ - preferred number of documents copies on the network. If indicated in percent, the calculation will be based on the network size. If the option is "auto" it will be calculated as `Math.ceil(Math.sqrt(networkSize))`.
 
@@ -160,9 +162,9 @@ If you need to have a strict field structure, then it can be defined as:
 } 
 ```
 
-## Defaults and hooks
+## Defaults, setters and getters
 
-Defaults work only if the values are __undefined__. Hooks are used anyway.
+Defaults work only if the values are __undefined__. Setters are used anyway.
 
 ``` 
 { 
@@ -171,8 +173,11 @@ Defaults work only if the values are __undefined__. Hooks are used anyway.
     priority: 0
     'nested.prop': (key, doc) => Date.now() - doc.date
   },
-  hooks: {
+  setters: {
     priority: (val, key, doc, prevDoc) => prevDoc? prevDoc.priority + 1: val
+  },
+  getters: {
+    priority: (val, key, doc) => val - 1
   }
 }
 ```

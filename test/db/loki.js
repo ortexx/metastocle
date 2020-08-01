@@ -32,23 +32,7 @@ describe('DatabaseLokiMetastocle', () => {
       const name = loki.createCollectionName('test');
       assert.equal(name, 'metaTest');
     });
-  });
-
-  describe('.prepareDocumentToAdd()', function () { 
-    it('should create the right document', function () {
-      const document = { x: 1, y: 1 };
-      const result = loki.prepareDocumentToAdd(document);
-      assert.equal(JSON.stringify(document), JSON.stringify(result));
-    });
-  });
-
-  describe('.prepareDocumentToGet()', function () { 
-    it('should create the right document', function () {
-      const document = { x: 1, y: 1 };
-      const result = loki.prepareDocumentToGet(document);
-      assert.equal(JSON.stringify(document), JSON.stringify(result));
-    });
-  });
+  });  
 
   describe('.createDocumentPrimaryKey()', function () { 
     it('should create pk', function () {
@@ -282,7 +266,7 @@ describe('DatabaseLokiMetastocle', () => {
           z: () => 1,
           x: 1
         },
-        hooks: {
+        setters: {
           d: () => 1,
           t: 1
         }
@@ -367,10 +351,46 @@ describe('DatabaseLokiMetastocle', () => {
       assert.equal(doc.x, 1, 'check without a function');
     });
 
-    it('should handle the hook fields', async function () {
+    it('should handle the setter fields', async function () {
       const doc = await loki.handleDocument({ $collection, t: 2, d: 2 });
       assert.equal(doc.d, 1, 'check with a function');
       assert.equal(doc.t, 1, 'check without a function');
+    });
+  });
+
+  describe('document preparing', function () { 
+    let $collection;
+
+    before(async function () {
+      $collection = 'test';
+
+      await this.node.addCollection($collection, {
+        pk: 'id',
+        setters: {
+          a: v => v + 1,
+        },
+        getters: {
+          a: v => v - 1
+        }
+      });
+    });
+
+    describe('.prepareDocumentToSet()', function () { 
+      it('should create the right document', async function () {
+        const document = { $collection: 'test', y: 1, a: 1 };
+        const result = await loki.prepareDocumentToSet(Object.assign({}, document));
+        document.a += 1;
+        assert.equal(JSON.stringify(document), JSON.stringify(result));
+      });
+    });
+
+    describe('.prepareDocumentToGet()', function () { 
+      it('should create the right document', async function () {
+        const document = { $collection: 'test', x: 1, y: 1, a: 2 };
+        const result = await loki.prepareDocumentToGet(Object.assign({}, document));
+        document.a -= 1;
+        assert.equal(JSON.stringify(document), JSON.stringify(result));
+      });
     });
   });
   

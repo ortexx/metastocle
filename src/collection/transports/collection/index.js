@@ -27,7 +27,7 @@ module.exports = (Parent) => {
      * @see Service.prototype.init
      */
     async init() {    
-      await this.node.db.addCollection(this.name, this);  
+      await this.node.db.addCollection(this.name, this);
       await super.init.apply(this, arguments);
     }
 
@@ -40,7 +40,42 @@ module.exports = (Parent) => {
     }
 
     /**
+     * Prepare the document to add
+     * 
+     * @async
+     * @param {object} doc
+     * @returns {object}
+     */
+    async prepareDocumentToAdd(doc) {
+      return utils.prepareDocumentFields(this.node.db.removeDocumentSystemFields(doc));
+    }
+
+    /**
+     * Prepare the document to update
+     * 
+     * @async
+     * @param {object} doc
+     * @returns {object}
+     */
+    async prepareDocumentToUpdate(doc) {
+      return this.prepareDocumentToAdd(doc);
+    }
+
+    /**
+     * Prepare the document to get
+     * 
+     * @async
+     * @param {object} doc
+     * @returns {object}
+     */
+    async prepareDocumentToGet(doc) {
+      return this.node.db.removeDocumentSystemFields(doc);
+    }
+
+    /**
      * The actions update test
+     * 
+     * @async
      */
     async actionsUpdateTest(actions) {
       this.actionsTypeTest(actions);
@@ -48,6 +83,8 @@ module.exports = (Parent) => {
 
     /**
      * The actions getting test
+     * 
+     * @async
      */
     async actionsGettingTest(actions) {
       this.actionsTypeTest(actions);
@@ -55,6 +92,8 @@ module.exports = (Parent) => {
 
     /**
      * The actions deletion test
+     * 
+     * @async
      */
     async actionsDeletionTest(actions) {
       this.actionsTypeTest(actions);

@@ -1,4 +1,5 @@
 const assert = require('chai').assert;
+const utils = require('../../src/utils');
 const Collection = require('../../src/collection/transports/collection')();
 
 describe('Behavior', () => {
@@ -20,6 +21,50 @@ describe('Behavior', () => {
     it('should not throw an exception', async function () {
       await collection.init();
     });  
+  });
+
+  describe('.prepareDocumentToAdd()', () => {
+    it('should create the right document', async () => {
+      const schema = {
+        type: 'object',
+        props: {
+          x: 'number',
+          d: 'number'
+        }
+      };
+      let document = { x: 1, d: new Date(), $createdAt: 1 };
+      document = await collection.prepareDocumentToAdd(document);
+      assert.doesNotThrow(() => utils.validateSchema(schema, document));
+    });
+  });
+
+  describe('.prepareDocumentToUpdate()', () => {
+    it('should create the right document', async () => {
+      const schema = {
+        type: 'object',
+        props: {
+          x: 'number',
+          d: 'number'
+        }
+      };
+      let document = { x: 1, d: new Date(), $createdAt: 1 };
+      document = await collection.prepareDocumentToUpdate(document);
+      assert.doesNotThrow(() => utils.validateSchema(schema, document));
+    });
+  });
+
+  describe('.prepareDocumentToGet()', () => {
+    it('should create the right document', async () => {
+      const schema = {
+        type: 'object',
+        props: {
+          x: 'number'
+        }
+      };
+      let document = { x: 1, $createdAt: 1 };
+      document = await collection.prepareDocumentToGet(document);
+      assert.doesNotThrow(() => utils.validateSchema(schema, document));
+    });
   });
 
   describe('.deinit()', function () { 

@@ -23,21 +23,7 @@ module.exports = (Parent) => {
     createCollectionName(name) {
       return this.options.metaPrefix + _.capitalize(name);
     }
-
-    /**
-     * @see DatabaseMetastocle.prototype.prepareDocumentToAdd
-     */
-    prepareDocumentToAdd(document) {
-      return document;
-    }
-
-    /**
-     * @see DatabaseMetastocle.prototype.prepareDocumentToGet
-     */
-    prepareDocumentToGet(document) {
-      return document;
-    }
-
+    
     /**
      * @see DatabaseMetastocle.prototype.createDocumentPrimaryKey
      */
@@ -182,12 +168,68 @@ module.exports = (Parent) => {
       delete document.$loki;
       document.$createdAt = document.$updatedAt = document.$accessedAt = Date.now();      
       document.$duplicate = document.$duplicate || this.createDocumentDuplicationKey(document);
-      document.$collection = name;
-      document = this.prepareDocumentToAdd(document);
+      document.$collection = name;     
       document = await this.handleDocument(document);
       document = this.col[fullName].insert(document);
       await this.removeCollectionExcessDocuments(name);
-      return this.prepareDocumentToGet(document);
+      return await this.prepareDocumentToGet(document);
+    }
+
+    /**
+     * @see DatabaseMetastocle.prototype.prepareDocumentToSet
+     */
+    async prepareDocumentToSet(document, prevDocument = null) {
+      if(!document.$collection) {
+        const msg = `Document must have "$collection" field`;
+        throw new errors.WorkError(msg, 'ERR_METASTOCLE_INVALID_DOCUMENT_COLLECTION');
+      }
+
+      const collection = await this.node.getCollection(document.$collection);
+
+      if(collection.defaults) {
+        for(let key in collection.defaults) {
+          const handler = collection.defaults[key];
+
+          if(_.get(document, key) !== undefined) {
+            continue;
+          }
+          
+          _.set(document, key, typeof handler == 'function'? await handler(key, document, prevDocument): handler);
+        }
+      }
+
+      if(collection.setters) {
+        for(let key in collection.setters) {
+          const handler = collection.setters[key];
+          const current = _.get(document, key);
+          const value = typeof handler == 'function'? await handler(current, key, document, prevDocument): handler;
+          _.set(document, key, value);
+        }
+      }
+
+      return document;
+    }
+
+    /**
+     * @see DatabaseMetastocle.prototype.prepareDocumentToGet
+     */
+    async prepareDocumentToGet(document) {
+      if(!document.$collection) {
+        const msg = `Document must have "$collection" field`;
+        throw new errors.WorkError(msg, 'ERR_METASTOCLE_INVALID_DOCUMENT_COLLECTION');
+      }
+
+      const collection = await this.node.getCollection(document.$collection);
+
+      if(collection.getters) {
+        for(let key in collection.getters) {
+          const handler = collection.getters[key];
+          const value = _.get(document, key);
+          _.set(document, key, typeof handler == 'function'? await handler(value, key, document): handler);
+        }
+      }
+
+      return document;
     }
 
     /**
@@ -201,26 +243,7 @@ module.exports = (Parent) => {
 
       const fullName = this.createCollectionName(document.$collection);
       const collection = await this.node.getCollection(document.$collection);
-      const prev = options.prevState || null;  
-
-      if(collection.defaults) {
-        for(let key in collection.defaults) {
-          const value = collection.defaults[key];
-
-          if(_.get(document, key) !== undefined) {
-            continue;
-          }
-
-          _.set(document, key, typeof value == 'function'? value(key, document, prev): value);
-        }
-      }
-
-      if(collection.hooks) {
-        for(let key in collection.hooks) {
-          const value = collection.hooks[key];
-          _.set(document, key, typeof value == 'function'? value(_.get(document, key), key, document, prev): value);
-        }
-      }
+      document = await this.prepareDocumentToSet(document, options.prevState || null);      
 
       if(collection.schema) {
         utils.validateSchema(collection.schema, document);
@@ -267,7 +290,7 @@ module.exports = (Parent) => {
       const fullName = this.createCollectionName(name);
       const collection = await this.node.getCollection(name);
       const document = this.col[fullName].by(collection.pk, value);
-      return document? this.prepareDocumentToGet(document): null;
+      return document? await this.prepareDocumentToGet(document): null;
     }
 
     /**
@@ -275,7 +298,13 @@ module.exports = (Parent) => {
      */
     async getDocuments(name) {
       const fullName = this.createCollectionName(name);
-      return this.col[fullName].find().map(d => this.prepareDocumentToGet(d));
+      const documents = this.col[fullName].find();
+
+      for(let i = 0; i < documents.length; i++) {
+        documents[i] = await this.prepareDocumentToGet(documents[i]);
+      }
+
+      return documents;
     }
 
     /**
@@ -285,7 +314,7 @@ module.exports = (Parent) => {
       const fullName = this.createCollectionName(document.$collection);
       document.$accessedAt = Date.now();    
       this.col[fullName].update(document);
-      return this.prepareDocumentToGet(document);
+      return await this.prepareDocumentToGet(document);
     }
 
     /**
@@ -293,10 +322,10 @@ module.exports = (Parent) => {
      */
     async accessDocuments(name, documents) {
       for(let i = 0; i < documents.length; i++) {
-        documents[i] = await this.accessDocument(documents[i]);
+        documents[i] = await this.prepareDocumentToGet(await this.accessDocument(documents[i]));
       }
 
-      return documents.map(d => this.prepareDocumentToGet(d));
+      return documents;
     }
 
     /**
@@ -309,7 +338,7 @@ module.exports = (Parent) => {
       options.prevState = this.col[fullName].get(document.$loki);
       document = await this.handleDocument(document, options);
       this.col[fullName].update(document);
-      return this.prepareDocumentToGet(document);
+      return await this.prepareDocumentToGet(document);
     }
 
     /**
@@ -338,9 +367,11 @@ module.exports = (Parent) => {
           delete pks[prevPkValue];
           pks[documents[i][collection.pk]] = documents[i];
         }
+
+        documents[i] = await this.prepareDocumentToGet(documents[i]);
       }
 
-      return documents.map(d => this.prepareDocumentToGet(d));
+      return documents;
     }
 
     /**

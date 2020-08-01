@@ -233,7 +233,7 @@ module.exports = (Parent) => {
       }
 
       document = this.extractDocumentExistenceInfo(existing) || document;
-      document = _.merge(this.prepareDocumentToAdd(document), { $duplicate: document.$duplicate });
+      document = _.merge(await collection.prepareDocumentToAdd(document), { $duplicate: document.$duplicate });
       await this.db.addBehaviorCandidate('addDocument', candidates[0].address);     
       const servers = candidates.map(c => c.address).sort(await this.createAddressComparisonFunction());
       const result = await this.duplicateDocument(servers, document, info, { timeout: timer() });
@@ -246,7 +246,7 @@ module.exports = (Parent) => {
         return existenceErrFn();
       }
 
-      return this.prepareDocumentToGet(result.document);
+      return await collection.prepareDocumentToGet(result.document);
     }
 
     /**
@@ -262,7 +262,7 @@ module.exports = (Parent) => {
       await this.documentTest(document);
       await this.collectionTest(collectionName);
       const collection = await this.getCollection(collectionName);
-      document = this.prepareDocumentToUpdate(document);
+      document = await collection.prepareDocumentToUpdate(document);
       const actions = utils.prepareDocumentUpdateActions(options);
       await collection.actionsUpdateTest(actions);
       const results =  await this.requestNetwork('update-documents', {
@@ -316,7 +316,7 @@ module.exports = (Parent) => {
         timeout: options.timeout,
         responseSchema: schema.getDocumentsMasterResponse({ schema: collection.schema, isCounting })
       });
-      return await this.handleDocumentsGettingForClient(results, actions);
+      return await this.handleDocumentsGettingForClient(results, collection, actions);
     }
 
     /**
@@ -385,17 +385,23 @@ module.exports = (Parent) => {
      * 
      * @async
      * @param {array} arr
+     * @param {object} collection
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsGettingForClient(arr, actions = {}) { 
+    async handleDocumentsGettingForClient(arr, collection, actions = {}) { 
       let documents = arr.reduce((p, c) => p.concat(c.documents), []);
       actions.removeDuplicates && (documents = this.uniqDocuments(documents));
       const handler = new utils.DocumentsHandler(documents);
       actions.sort && handler.sortDocuments(actions.sort);
       const totalCount = handler.getDocuments().length;
       (actions.limit || actions.offset) && handler.limitDocuments(actions.offset, actions.limit);
-      documents = handler.getDocuments().map(d => this.prepareDocumentToGet(d));
+      documents = handler.getDocuments();
+
+      for(let i = 0; i < documents.length; i++) {
+        documents[i] = await collection.prepareDocumentToGet(documents[i]);
+      }
+
       return { documents, totalCount };
     }
 
@@ -638,37 +644,7 @@ module.exports = (Parent) => {
 
       scheme = _.merge({ expected: true }, scheme, schema.getDocumentSystemFields());
       return scheme;
-    }
-
-    /**
-     * Prepare the document to add
-     * 
-     * @param {object} doc
-     * @returns {object}
-     */
-    prepareDocumentToAdd(doc) {
-      return utils.prepareDocumentFields(this.db.removeDocumentSystemFields(doc));
-    }
-
-    /**
-     * Prepare the document to update
-     * 
-     * @param {object} doc
-     * @returns {object}
-     */
-    prepareDocumentToUpdate(doc) {
-      return this.prepareDocumentToAdd(doc);
-    }
-
-    /**
-     * Prepare the document to get
-     * 
-     * @param {object} doc
-     * @returns {object}
-     */
-    prepareDocumentToGet(doc) {
-      return this.db.removeDocumentSystemFields(doc);
-    }
+    }    
 
     /**
      * Prepare the options

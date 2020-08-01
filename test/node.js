@@ -389,50 +389,6 @@ describe('Node', () => {
       assert.throws(() => utils.validateSchema(schema, { id: 1, y: 2 }), '', 'check the wrong data');
     });
   });
-
-  describe('.prepareDocumentToAdd()', () => {
-    it('should create the right document', () => {
-      const schema = {
-        type: 'object',
-        props: {
-          x: 'number',
-          d: 'number'
-        }
-      };
-      let document = { x: 1, d: new Date(), $createdAt: 1 };
-      document = node.prepareDocumentToAdd(document);
-      assert.doesNotThrow(() => utils.validateSchema(schema, document));
-    });
-  });
-
-  describe('.prepareDocumentToUpdate()', () => {
-    it('should create the right document', () => {
-      const schema = {
-        type: 'object',
-        props: {
-          x: 'number',
-          d: 'number'
-        }
-      };
-      let document = { x: 1, d: new Date(), $createdAt: 1 };
-      document = node.prepareDocumentToUpdate(document);
-      assert.doesNotThrow(() => utils.validateSchema(schema, document));
-    });
-  });
-
-  describe('.prepareDocumentToGet()', () => {
-    it('should create the right document', () => {
-      const schema = {
-        type: 'object',
-        props: {
-          x: 'number'
-        }
-      };
-      let document = { x: 1, $createdAt: 1 };
-      document = node.prepareDocumentToGet(document);
-      assert.doesNotThrow(() => utils.validateSchema(schema, document));
-    });
-  });
   
   describe('.deinit()', () => {
     it('should not throw an exception', async () => {

@@ -12,15 +12,19 @@ describe('Behavior', () => {
 
     it('should create the default properties', function () { 
       assert.containsAllKeys(collection, [
-        'pk', 'limit', 'queue',  'limitationOrder','preferredDuplicates', 'schema'
+        'pk', 'limit', 'queue', 'limitationOrder','preferredDuplicates'
       ]);
     });
   });
 
   describe('.init()', function () { 
     it('should not throw an exception', async function () {
-      await collection.init();
-    });  
+      await collection.init();      
+    }); 
+    
+    it('should create the scema field', function () { 
+      assert.containsAllKeys(collection, ['schema']);
+    });
   });
 
   describe('.prepareDocumentToAdd()', () => {

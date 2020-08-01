@@ -3,7 +3,7 @@ const utils = require('../../../utils');
 
 module.exports = (Parent) => {
   /**
-   * Behavior transport
+   * Collection transport
    */
   return class Collection extends (Parent || Service) {
     /**
@@ -19,14 +19,14 @@ module.exports = (Parent) => {
         queue: false,
         preferredDuplicates: "auto",
         limitationOrder: '$accessedAt'
-      }, options);
-      this.schema = node.createDocumentFullSchema(this.schema);
+      }, options);      
     }
 
     /**
      * @see Service.prototype.init
      */
     async init() {    
+      this.schema = this.node.createDocumentFullSchema(this.schema);
       await this.node.db.addCollection(this.name, this);
       await super.init.apply(this, arguments);
     }
@@ -103,7 +103,7 @@ module.exports = (Parent) => {
      * The actions type test
      */
     actionsTypeTest(actions) {
-      utils.actionsTest(actions);      
+      utils.actionsTest(actions);
     }   
   }
 };

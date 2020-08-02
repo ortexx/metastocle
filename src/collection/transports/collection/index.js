@@ -16,6 +16,7 @@ module.exports = (Parent) => {
       this.options = Object.assign(this, {        
         pk: '',
         limit: 0,
+        maxSize: 0,
         queue: false,
         preferredDuplicates: "auto",
         limitationOrder: '$accessedAt'
@@ -27,6 +28,7 @@ module.exports = (Parent) => {
      */
     async init() {    
       this.schema = this.node.createDocumentFullSchema(this.schema);
+      this.maxSize = utils.getBytes(this.maxSize);
       await this.node.db.addCollection(this.name, this);
       await super.init.apply(this, arguments);
     }

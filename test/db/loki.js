@@ -1,7 +1,8 @@
 const assert = require('chai').assert;
+const fse = require('fs-extra');
+const sizeof = require('object-sizeof');
 const tools = require('../tools');
 const DatabaseLokiMetastocle = require('../../src/db/transports/loki')();
-const fse = require('fs-extra');
 
 describe('DatabaseLokiMetastocle', () => {
   let loki;
@@ -139,7 +140,7 @@ describe('DatabaseLokiMetastocle', () => {
     });
   });
 
-  describe('.removeCollectionExcessDocuments()', function () { 
+  describe('.removeCollectionExcessDocumentsByLimit()', function () { 
     let col;
 
     before(async function () {      
@@ -158,16 +159,55 @@ describe('DatabaseLokiMetastocle', () => {
     });
 
     it('should remove the excess documents', async function () {
-      const count = col.chain().count();
       const limit = (await this.node.getCollection('test')).limit; 
-      const length = limit - count;
+      let last;
 
-      for(let i = 0; i < length + 1; i++) {
-        col.insert({ id: i + 2 });
+      for(let i = 0; i < 4; i++) {
+        last = i + 2;
+        col.insert({ id: last, $accessedAt: Date.now() + i });
       }
 
       await loki.removeCollectionExcessDocuments('test');
-      assert.equal(col.chain().count(), limit);
+      assert.equal(col.chain().count(), limit, 'check the count');
+      assert.isNotNull(col.findOne({ id: last }), 'check the order');
+    });
+  });
+
+  describe('.removeCollectionExcessDocumentsBySize()', function () { 
+    let col;
+
+    before(async function () {      
+      await this.node.addCollection('test', {});
+      col = loki.col[loki.createCollectionName('test')];
+    });
+
+    after(async function () {
+      await this.node.removeCollection('test');
+    });
+
+    it('should not change the count', async function () {
+      const count = col.chain().count();
+      await loki.removeCollectionExcessDocuments('test');
+      assert.equal(count, col.chain().count());
+    });
+
+    it('should remove the excess documents', async function () {      
+      const collection = await this.node.getCollection('test');      
+      let lastId;
+      let lastSize;
+
+      for(let i = 0; i < 4; i++) {        
+        lastId = i + 1;
+        const doc = { id: lastId, $accessedAt: Date.now() + i };
+        lastSize = sizeof(col.insert(doc));
+      }
+
+      const size = sizeof(col.data);
+      const count = col.chain().count();      
+      collection.maxSize = size - lastSize - 1;
+      await loki.removeCollectionExcessDocuments('test');
+      assert.equal(col.chain().count(), count / 2, 'check the count');
+      assert.isNotNull(col.findOne({ id: lastId }), 'check the order');
     });
   });
 

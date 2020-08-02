@@ -1,6 +1,7 @@
 const DatabaseMetastocle = require('../database')();
 const DatabaseLoki = require('spreadable/src/db/transports/loki')(DatabaseMetastocle);
 const _ = require('lodash');
+const sizeof = require("object-sizeof");
 const utils = require('../../../utils');
 const errors = require('../../../errors');
 const uuidv1 = require('uuid/v1');
@@ -117,10 +118,30 @@ module.exports = (Parent) => {
       }
     }
 
-     /**
+    /**
      * @see DatabaseMetastocle.prototype.removeCollectionExcessDocuments
      */
     async removeCollectionExcessDocuments(name) {
+      const collection = await this.node.getCollection(name);
+
+      let order = collection.limitationOrder || '$accessedAt';
+      !Array.isArray(order) && (order = [order]);
+      const newOrder = [];      
+      
+      for(let i = 0; i < order.length; i++) {
+        let item = order[i];
+        item = Array.isArray(item)? [item[0], item[1] == 'desc']: [item, false];
+        newOrder.push(item);
+      }
+
+      await this.removeCollectionExcessDocumentsByLimit(name, newOrder);
+      await this.removeCollectionExcessDocumentsBySize(name, newOrder);
+    } 
+
+    /**
+     * @see DatabaseMetastocle.prototype.removeCollectionExcessDocumentsByLimit
+     */
+    async removeCollectionExcessDocumentsByLimit(name, order) {
       const fullName = this.createCollectionName(name);
       const collection = await this.node.getCollection(name);
       const count = await this.getCollectionSize(name);
@@ -129,19 +150,39 @@ module.exports = (Parent) => {
         return;
       }
 
-      let order = collection.limitationOrder || '$accessedAt';
-      !Array.isArray(order) && (order = [order]);
-      const newOrder = [];
-      
-      
-      for(let i = 0; i < order.length; i++) {
-        let item = order[i];
-        item = Array.isArray(item)? [item[0], item[1] == 'asc']: [item, true];
-        newOrder.push(item);
+      this.col[fullName].chain().find().compoundsort(order).limit(count - collection.limit).remove();
+    }
+
+    /**
+     * @see DatabaseMetastocle.prototype.removeCollectionExcessDocumentsBySize
+     */
+    async removeCollectionExcessDocumentsBySize(name, order) {
+      const fullName = this.createCollectionName(name);
+      const collection = await this.node.getCollection(name);
+
+      if(!collection.maxSize) {
+        return;
       }
 
-      this.col[fullName].chain().find().compoundsort(newOrder).offset(collection.limit).remove();
-    } 
+      let size = sizeof(this.col[fullName].data);
+
+      if(size <= collection.maxSize) {
+        return;
+      }
+
+      const docs = this.col[fullName].chain().find().compoundsort(order).data();
+
+      for(let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        let docSize = sizeof(doc);
+        this.col[fullName].remove(doc);
+        size -= docSize;
+
+        if(size <= collection.maxSize) {
+          break;
+        }
+      }
+    }
 
     /**
      * @see DatabaseMetastocle.prototype.getCollectionSize

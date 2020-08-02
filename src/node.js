@@ -200,7 +200,6 @@ module.exports = (Parent) => {
       const collection = await this.getCollection(collectionName);
       const info = { collection: collectionName };
       collection.pk && (info.pkValue = _.get(document, collection.pk));
-      collection.schema && utils.validateSchema(collection.schema, document);
       const masterRequestTimeout = await this.getRequestMasterTimeout();
       const results = await this.requestNetwork('get-document-addition-info', {
         body: { info },
@@ -208,10 +207,7 @@ module.exports = (Parent) => {
           [masterRequestTimeout, this.options.request.documentAdditionNodeTimeout],
           { min: masterRequestTimeout, grabFree: true }
         ),
-        responseSchema: schema.getDocumentAdditionInfoMasterResponse({ 
-          networkOptimum: await this.getNetworkOptimum(),
-          schema: collection.schema
-        })
+        responseSchema: schema.getDocumentAdditionInfoMasterResponse({ schema: collection.schema })
       });
       const existing = _.flatten(results).reduce((p, c) => p.concat(c.existing), []);
       const duplicatesCount = await this.getDocumentDuplicatesCount(info);      

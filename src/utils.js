@@ -682,7 +682,7 @@ utils.prepareDocumentUpdateActions = function (actions) {
   return merge({
     replace: false,
   }, pick(actions, ['replace', 'filter']), {
-    filter: actions.filter? utils.prepareDocumentFilter(actions.filter): null
+    filter: actions.filter? this.prepareDocumentFilter(actions.filter): null
   });
 };
 
@@ -695,7 +695,7 @@ utils.prepareDocumentUpdateActions = function (actions) {
 utils.prepareDocumentDeletionActions = function (actions) {
   this.actionsTest(actions);
   return merge({}, pick(actions, ['filter']), {
-    filter: actions.filter? utils.prepareDocumentFilter(actions.filter): null
+    filter: actions.filter? this.prepareDocumentFilter(actions.filter): null
   });
 };
 

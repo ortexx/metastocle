@@ -189,8 +189,12 @@ module.exports = (Parent) => {
      * @param {object} [options]
      * @returns {object}
      */
-    async addDocument(collectionName, document, options = {}) {    
+    async addDocument(collectionName, document, options = {}) {
       const existenceErrFn = () => {
+        if(options.ignoreExistenceError) {
+          return document;
+        }
+
         const data = JSON.stringify(document, null, 1);
         throw new errors.WorkError(`Document ${ data } already exists`, 'ERR_METASTOCLE_DOCUMENT_EXISTS');
       }
@@ -199,6 +203,7 @@ module.exports = (Parent) => {
       const timer = this.createRequestTimer(options.timeout);
       const collection = await this.getCollection(collectionName);
       const info = { collection: collectionName };
+      document = await collection.prepareDocumentToAdd(document);
       collection.pk && (info.pkValue = _.get(document, collection.pk));
       const masterRequestTimeout = await this.getRequestMasterTimeout();
       const results = await this.requestNetwork('get-document-addition-info', {
@@ -211,7 +216,10 @@ module.exports = (Parent) => {
       });
       const existing = _.flatten(results).reduce((p, c) => p.concat(c.existing), []);
       const duplicatesCount = await this.getDocumentDuplicatesCount(info);      
-      const limit = duplicatesCount - existing.length;      
+      const limit = duplicatesCount - existing.length;
+      const extDoc = this.extractDocumentExistenceInfo(existing);
+      document = extDoc? extDoc: document;
+      document = _.merge(document, { $duplicate: document.$duplicate });    
       
       if(limit <= 0) {
         return existenceErrFn();
@@ -227,11 +235,9 @@ module.exports = (Parent) => {
       if(!candidates.length) {
         return existenceErrFn();
       }
-
-      document = this.extractDocumentExistenceInfo(existing) || document;
-      document = _.merge(await collection.prepareDocumentToAdd(document), { $duplicate: document.$duplicate });
+      
       await this.db.addBehaviorCandidate('addDocument', candidates[0].address);     
-      const servers = candidates.map(c => c.address).sort(await this.createAddressComparisonFunction());
+      const servers = candidates.map(c => c.address).sort(await this.createAddressComparisonFunction());      
       const result = await this.duplicateDocument(servers, document, info, { timeout: timer() });
       
       if(!result && !existing.length) {
@@ -480,7 +486,7 @@ module.exports = (Parent) => {
      * get the document existence info
      * 
      * @see NodeMetastocle.prototype.documentAvailabilityTest
-     * @returns {object|null}
+     * @returns {object|nfull}
      */
     async getDocumentExistenceInfo(info) {
       if(info.pkValue === undefined) {

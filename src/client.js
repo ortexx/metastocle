@@ -37,7 +37,8 @@ module.exports = (Parent) => {
       const result = await this.request('add-document', {
         body: {
           collection,
-          document
+          document,
+          ignoreExistenceError: options.ignoreExistenceError
         },
         timeout: options.timeout || this.options.request.documentAdditionTimeout
       });

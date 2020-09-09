@@ -6,7 +6,8 @@ module.exports.addDocument = node => {
     try {
       const collection = req.body.collection;
       let document = req.body.document;
-      document = await node.addDocument(collection, document, node.prepareClientMessageOptions(req.body));
+      const options = { ignoreExistenceError: !!req.body.ignoreExistenceError };
+      document = await node.addDocument(collection, document, node.prepareClientMessageOptions(req.body, options));
       res.send({ document });
     }
     catch(err) {

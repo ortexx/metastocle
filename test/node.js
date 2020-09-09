@@ -118,6 +118,11 @@ describe('Node', () => {
         assert.isOk(err.message.match('already exists'));   
       }
     });
+
+    it('should not add the existent document, but without an error', async () => {
+      const result = await node.addDocument('test2', { id: 1, x: 2 }, { ignoreExistenceError: true });
+      assert.equal(result.id, 1);
+    });
   });
 
   describe('.getDocuments()', () => {

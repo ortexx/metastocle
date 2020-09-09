@@ -121,11 +121,11 @@ In production, collections should only be created before the node is initialized
 
 * {integer|string} __[maxSize=0]__ - memory limit for the collection. If it is zero then there is no limits. 
 
-* {boolean} __[queue=false]__ - documents queue option. This option works in combination with meta.limit. If the queue is enabled, then when you add a new document that exceeds the limit, another one will be deleted to free up space. First of all, it is documents that were used less often.
+* {boolean} __[queue=false]__ - documents queue option. This option works in combination with meta.limit or meta.maxSize. If the queue is enabled, then when you add a new document that exceeds the limit, another one will be deleted to free up space. First of all, it is documents that were used less often.
 
-* {string|string[]|array[]} __[limitationOrder="$accessedAt"]__ - sorting procedure for documents to be deleted if the limit or maxSize is exceeded.
+* {string|string[]|array[]} __[limitationOrder="$accessedAt"]__ - sorting procedure for documents to be deleted if the limits are exceeded.
 
-* {object} __[schema]__ - document fields structure
+* {object} __[schema]__ - document fields structure.
 
 * {object} __[defaults]__ - default values for document fields. Each property value can be a function.
 
@@ -164,6 +164,8 @@ If you need to have a strict field structure, then it can be defined as:
 } 
 ```
 
+This kind of a schema is handled by [utils.validateSchema](https://github.com/ortexx/spreadable/blob/master/src/utils.js) function, where you can find all the rules.
+
 ## Defaults, setters and getters
 
 Defaults work only if the values are __undefined__. Setters are used anyway.
@@ -184,8 +186,6 @@ Defaults work only if the values are __undefined__. Setters are used anyway.
 }
 ```
 
-This kind of a schema is handled by [utils.validateSchema](https://github.com/ortexx/spreadable/blob/master/src/utils.js) function, where you can find all the rules.
-
 ## Client configuration
 
 When you create an instance of the client you can pass options below. Only specific options of this library are described here, without considering the options of the parent classes.
@@ -204,6 +204,7 @@ async __Client.prototype.addDocument()__ - add file to the network.
   * {string} __collection__ - collection name
   * {object} __document__ - document
   * {object} __[options]__ - addition options
+  * {object} __[options.ignoreExistenceError=false]__ - throw or not an error if the document already exists   
   * {number} __[options.timeout]__ - addition timeout
 
 async __Client.prototype.getDocuments()__ - get all matched documents.

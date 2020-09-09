@@ -192,7 +192,7 @@ module.exports = (Parent) => {
     async addDocument(collectionName, document, options = {}) {
       const existenceErrFn = () => {
         if(options.ignoreExistenceError) {
-          return document;
+          return preparedExtDoc;
         }
 
         const data = JSON.stringify(document, null, 1);
@@ -218,6 +218,7 @@ module.exports = (Parent) => {
       const duplicatesCount = await this.getDocumentDuplicatesCount(info);      
       const limit = duplicatesCount - existing.length;
       const extDoc = this.extractDocumentExistenceInfo(existing);
+      const preparedExtDoc = extDoc? await collection.prepareDocumentToGet(extDoc): null;
       document = extDoc? extDoc: document;
       document = _.merge(document, { $duplicate: document.$duplicate });    
       

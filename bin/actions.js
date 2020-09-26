@@ -8,7 +8,15 @@ const actions = Object.assign({}, require('spreadable/bin/actions'));
  */
 actions.addDocument = async node => {
   const collection = argv.collection || argv.o;
-  const document = JSON.parse(argv.document || argv.d);  
+  let document = argv.document || argv.d;
+
+  try {
+    document = require(utils.getAbsolutePath(document));
+  }
+  catch(err) {
+    document = JSON.parse(document);
+  }
+
   const result = await node.addDocument(collection, document);
   //eslint-disable-next-line no-console
   console.log(chalk.cyan(`Document ${JSON.stringify(result, null, 1)} has been added`));

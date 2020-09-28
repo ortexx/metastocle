@@ -200,17 +200,23 @@ module.exports = (Parent) => {
       const fullName = this.createCollectionName(name);
       const collection = await this.node.getCollection(name);
       const count = await this.getCollectionSize(name);
+      const colData = this.col[fullName].data;
+      const errMsg = `Too much documents are in collection "${name}", you can't add new one`;
 
       if(collection.limit && !collection.queue && count >= collection.limit) {
-        const msg = `Too much documents are in collection "${name}", you can't add new one`;
-        throw new errors.WorkError(msg, 'ERR_METASTOCLE_DOCUMENTS_LIMIT');
+        throw new errors.WorkError(errMsg, 'ERR_METASTOCLE_DOCUMENTS_LIMIT');
       }
 
       delete document.$loki;
       document.$createdAt = document.$updatedAt = document.$accessedAt = Date.now();      
       document.$duplicate = document.$duplicate || this.createDocumentDuplicationKey(document);
-      document.$collection = name;     
+      document.$collection = name;
       document = await this.handleDocument(document);
+
+      if(collection.maxSize && !collection.queue && sizeof(colData) + sizeof(document) > collection.maxSize) {        
+        throw new errors.WorkError(errMsg, 'ERR_METASTOCLE_DOCUMENTS_MAX_SIZE');
+      }
+
       document = this.col[fullName].insert(document);
       await this.removeCollectionExcessDocuments(name);
       return await this.prepareDocumentToGet(document);

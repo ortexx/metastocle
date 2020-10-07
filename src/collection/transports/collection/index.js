@@ -7,12 +7,10 @@ module.exports = (Parent) => {
    */
   return class Collection extends (Parent || Service) {
     /**
-     * @param {Node} node 
      * @param {object} [options]
      */
-    constructor(node, options = {}) {
+    constructor(options = {}) {
       super(...arguments);
-      this.node = node; 
       this.options = Object.assign(this, {        
         pk: '',
         limit: 0,

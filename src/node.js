@@ -28,54 +28,9 @@ module.exports = (Parent) => {
         },
         collections: {},
       }, options);
-      super(options); 
-      this.__collections = {};
+      super(options);
     }
-
-    /**
-     * @see Node.prototype.init
-     */
-    async init() {
-      for(let key in this.options.collections) {
-        await this.addCollection(key, this.options.collections[key]);
-      }
-
-      await super.init.apply(this, arguments);
-    }
-
-     /**
-     * @see Node.prototype.initServices
-     */
-    async initServices() {
-      await super.initServices();
-
-      for(let key in this.__collections) {
-        await this.__collections[key].init();      
-      }
-    }
-
-    /**
-     * @see Node.prototype.deinitServices
-     */
-    async deinitServices() {
-      for(let key in this.__collections) {
-        await this.__collections[key].deinit();
-      }
-
-      await super.deinitServices();
-    }
-
-    /**
-     * @see Node.prototype.deinitServices
-     */
-    async destroyServices() {
-      for(let key in this.__collections) {
-        await this.__collections[key].destroy();
-      }
-
-      await super.destroyServices();
-    }
-
+    
     /**
      * @see Node.prototype.sync
      */
@@ -89,7 +44,17 @@ module.exports = (Parent) => {
      */
     async getStatusInfo(pretty = false) {      
       const documents = [];
-      const collections = Object.keys(this.__collections);
+      const collections = [];
+      
+      for(let i = 0; i < this.__services.length; i++) {
+        const service = this.__services[i];
+
+        if(service.type !== 'collection') {
+          continue;
+        }
+
+        collections.push(service.name);
+      }
 
       for(let i = 0; i < collections.length; i++) {
         documents.push(await this.db.getCollectionSize(collections[i]));
@@ -102,6 +67,27 @@ module.exports = (Parent) => {
     }
 
     /**
+     * Prepare the services
+     * 
+     * @async
+     */
+    async prepareServices() { 
+      await super.prepareServices.apply(this, arguments);      
+      await this.prepareCollections();
+    }
+
+    /**
+     * Prepare the collections
+     * 
+     * @async
+     */
+    async prepareCollections() { 
+      for(let key in this.options.collections) {
+        await this.addCollection(key, this.options.collections[key]);
+      }    
+    }
+
+    /**
      * Add the collection
      * 
      * @async
@@ -109,15 +95,13 @@ module.exports = (Parent) => {
      * @param {Collection} collection
      */
     async addCollection(name, collection) {
-      _.isPlainObject(collection) && (collection = new Collection(this, collection));
-      collection.name = name;
+      _.isPlainObject(collection) && (collection = new Collection(collection));
       
       if(this.__initialized) {
-        this.logger.warn(`Add collection "${ name }" before the node initialization`);        
-        !collection.__initialized && await collection.init();
+        this.logger.warn(`Add collection "${ name }" before the node initialization`);
       }
 
-      this.__collections[name] = collection;
+      return await this.addService(name, collection, 'collection');
     }
 
     /**
@@ -128,7 +112,7 @@ module.exports = (Parent) => {
      * @returns {object|null}
      */
     async getCollection(name) {
-      return this.__collections[name] || null;
+      return await this.getService(name, 'collection');
     }
 
     /**
@@ -138,14 +122,7 @@ module.exports = (Parent) => {
      * @param {string} name
      */
     async removeCollection(name) {
-      const collection = this.__collections[name];
-
-      if(!collection) {
-        return;
-      }
-
-      await collection.destroy();
-      delete this.__collections[name];
+      return await this.removeService(name, 'collection');
     }
 
     /**

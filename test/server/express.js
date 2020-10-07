@@ -7,7 +7,8 @@ describe('ServerExpressMetastocle', () => {
 
   describe('instance creation', function () {
     it('should create an instance', function () { 
-      assert.doesNotThrow(() => server = new ServerExpressMetastocle(this.node));  
+      assert.doesNotThrow(() => server = new ServerExpressMetastocle());  
+      server.node = this.node;
       nodeServer = this.node.server;
       this.node.server = server; 
     });

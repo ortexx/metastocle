@@ -25,7 +25,7 @@ describe('Node', () => {
     });
 
     it('should create the start collection', async () => {
-      assert.isObject(node.__collections.start);
+      assert.isObject(await node.getCollection('start'));
     });
   });
 
@@ -33,7 +33,7 @@ describe('Node', () => {
     it('should add the collection', async () => {
       const name = 'test';
       await node.addCollection(name, {});
-      assert.equal(node.__collections.test.name, name);
+      assert.equal((await node.getCollection('test')).name, name);
     });
   });
 

@@ -10,9 +10,10 @@ describe('DatabaseLokiMetastocle', () => {
   
   describe('instance creation', function () {
     it('should create an instance', function () { 
-      assert.doesNotThrow(() => loki = new DatabaseLokiMetastocle(this.node, {
+      assert.doesNotThrow(() => loki = new DatabaseLokiMetastocle({
         filename: tools.getDbFilePath(this.node)
       }));    
+      loki.node = this.node;
       lastNodeDb = this.node.db;
       this.node.db = loki;
     });
@@ -134,7 +135,7 @@ describe('DatabaseLokiMetastocle', () => {
     });
 
     it('should normalize the collection absence', async function () {
-      delete this.node.__collections.test;
+      await this.node.removeCollection('test');
       await loki.normalizeCollections();
       assert.isNull(await loki.getCollection('test'));
     });

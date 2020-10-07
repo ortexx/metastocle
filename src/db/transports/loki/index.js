@@ -11,11 +11,11 @@ module.exports = (Parent) => {
    * Lokijs database transport
    */
   return class DatabaseLokiMetastocle extends (Parent || DatabaseLoki) {
-    constructor(node, options = {}) {
+    constructor(options = {}) {
       options = _.merge({
         metaPrefix: 'meta'
       }, options);
-      super(node, options);
+      super(options);
     }
 
     /**

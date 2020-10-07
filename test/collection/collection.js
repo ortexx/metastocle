@@ -7,7 +7,9 @@ describe('Behavior', () => {
   
   describe('instance creation', function () {
     it('should create an instance', function () {
-      assert.doesNotThrow(() => collection = new Collection(this.node));
+      assert.doesNotThrow(() => collection = new Collection());
+      collection.node = this.node;
+      collection.name = 'test';
     });
 
     it('should create the default properties', function () { 

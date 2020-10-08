@@ -1,6 +1,6 @@
 {
   "name": "metastocle",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Decentralized data storage",
   "main": "./src/index.js",
   "bin": {
@@ -57,7 +57,7 @@
     "lodash": "^4.17.20",
     "node-fetch": "^2.6.1",
     "object-sizeof": "^1.6.1",
-    "spreadable": "~0.2.2",
+    "spreadable": "~0.2.3",
     "uuid": "^3.3.3",
     "yargs": "^15.4.1"
   },

@@ -14,7 +14,7 @@ module.exports = (Parent) => {
    */
   return class NodeMetastocle extends (Parent || Node) {
     static get version () { return pack.version }
-    static get codename () { return 'metastocle' }
+    static get codename () { return pack.name }
     static get DatabaseTransport () { return DatabaseLokiMetastocle }
     static get ServerTransport () { return ServerExpressMetastocle }
 

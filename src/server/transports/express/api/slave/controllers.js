@@ -29,7 +29,7 @@ module.exports.getDocumentAdditionInfo = node => {
  */
 module.exports.getDocuments = node => {
   return async (req, res, next) => {
-    try {      
+    try {
       const isCounting = req.body.isCounting;
       const pkValue =  req.body.pkValue;
       let documents = [];

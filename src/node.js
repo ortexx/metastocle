@@ -550,7 +550,7 @@ module.exports = (Parent) => {
       return {
         uniq: 'address',
         fnCompare: await this.createSuspicionComparisonFunction('addDocument', await this.createDocumentAdditionComparisonFunction()),
-        fnFilter: c => !c.existenceInfo || c.isAvailable,
+        fnFilter: c => !c.existenceInfo && c.isAvailable,
         schema: schema.getDocumentAdditionInfoSlaveResponse(),
         limit: await this.getDocumentDuplicatesCount(info)
       }

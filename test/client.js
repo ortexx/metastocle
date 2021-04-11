@@ -37,7 +37,7 @@ describe('Client', () => {
   describe('.addDocument()', () => {
     it('should add the document', async () => {
       const collection = 'test1';
-      const document = { x: 1, y: 1 };
+      const document = { x: 1, y: 1, s: '(teXt' };
       const result = await client.addDocument(collection, document);
       const dbResult = (await node.getDocuments(collection)).documents[0];
       assert.equal(JSON.stringify(document), JSON.stringify(result), JSON.stringify(dbResult));
@@ -54,7 +54,14 @@ describe('Client', () => {
     });
 
     it('should get documents with actions', async () => {
-      const result = await client.getDocuments('test1', { filter: { x: 1 } });
+      const result = await client.getDocuments('test1', { 
+        filter: { 
+          x: 1, 
+          s: {
+            $rx: /\(text/i 
+          } 
+        } 
+      });
       assert.lengthOf(result.documents, 1, 'check the array length');        
       assert.equal(result.totalCount, 1, 'check the total count');
     });        

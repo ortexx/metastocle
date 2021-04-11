@@ -4,7 +4,6 @@ const orderBy = require('lodash/orderBy');
 const pickBy = require('lodash/pickBy');
 const pick = require('lodash/pick');
 const get = require('lodash/get');
-const escapeRegExp = require('lodash/escapeRegExp');
 const errors = require('./errors');
 
 /**
@@ -424,7 +423,7 @@ utils.DocumentsHandler = class {
    * 
    * @see utils.DocumentsHandler.prototype.$ew
    */
-   $iew(value, filter) {
+  $iew(value, filter) {
     utils.validateSchema({ type: 'string' }, value);
     utils.validateSchema({ type: 'string' }, filter);
     return this.$ew(value.toLowerCase(), filter.toLowerCase());
@@ -447,7 +446,7 @@ utils.DocumentsHandler = class {
   $lk(value, filter) {
     utils.validateSchema({ type: 'string' }, value);
     utils.validateSchema({ type: 'string' }, filter);
-    return !!value.match(filter);
+    return value.includes(filter);
   }
 
   /**
@@ -485,7 +484,7 @@ utils.DocumentsHandler = class {
       },
       required: ['source']
     }, filter);
-    return !!value.match(new RegExp(escapeRegExp(filter.source), filter.flags));
+    return new RegExp(filter.source, filter.flags).test(value);
   }
 
   /**

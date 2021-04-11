@@ -175,7 +175,7 @@ describe('utils', () => {
 
     describe('.$sw()', () => {
       it('should return true', () => { 
-        assert.isTrue(handler.$sw('text', 'te')); 
+        assert.isTrue(handler.$sw('(text', '(te')); 
       });
 
       it('should return false', () => { 
@@ -185,7 +185,7 @@ describe('utils', () => {
 
     describe('.$isw()', () => {
       it('should return true', () => { 
-        assert.isTrue(handler.$isw('Text', 'te')); 
+        assert.isTrue(handler.$isw('(Text', '(te')); 
       });
 
       it('should return false', () => { 
@@ -195,7 +195,7 @@ describe('utils', () => {
 
     describe('.$ew()', () => {
       it('should return true', () => { 
-        assert.isTrue(handler.$ew('text', 'xt')); 
+        assert.isTrue(handler.$ew('te)xt', ')xt')); 
       });
 
       it('should return false', () => { 
@@ -205,7 +205,7 @@ describe('utils', () => {
 
     describe('.$iew()', () => {
       it('should return true', () => { 
-        assert.isTrue(handler.$iew('text', 'Xt')); 
+        assert.isTrue(handler.$iew('text.', 'Xt.')); 
       });
 
       it('should return false', () => { 
@@ -215,7 +215,7 @@ describe('utils', () => {
 
     describe('.$lk()', () => {
       it('should return true', () => { 
-        assert.isTrue(handler.$lk('text', 'ex')); 
+        assert.isTrue(handler.$lk('t(ext', '(ex')); 
       });
 
       it('should return false', () => { 
@@ -235,11 +235,12 @@ describe('utils', () => {
 
     describe('.$rx()', () => {
       it('should return true', () => { 
-        assert.isTrue(handler.$rx('text', { source: 'text', flags: 'i' }));
+        assert.isTrue(handler.$rx('(text', { source: '\\(teXt', flags: 'i' }), 'as an object');
+        assert.isTrue(handler.$rx('(text', { source: /\(text/.source }), 'as a RegExp');
       });
 
       it('should return false', () => { 
-        assert.isFalse(handler.$rx('texT', { source: 'text' }));    
+        assert.isFalse(handler.$rx('texT', { source: 'text' }));
       });
     });
 

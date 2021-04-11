@@ -108,17 +108,21 @@ utils.DocumentsHandler = class {
             return false;
           }
         }
+
         continue;
       }
 
       if(key == '$or') {
-        const res = [];
+        let ok = false;
 
         for(let i = 0; i < filter[key].length; i++) {
-          res.push(this.checkDocumentValue(value, filter[key][i]));
+          if(this.checkDocumentValue(value, filter[key][i])) {
+            ok = true;
+            break;
+          }
         }
 
-        if(res.indexOf(true) == -1) {
+        if(!ok) {
           return false;
         }
 

@@ -36,6 +36,42 @@ describe('utils', () => {
         handler.filterDocuments({ x: { $lt: 10 }, y: 1 });      
         assert.equal(JSON.stringify(handler.getDocuments()), JSON.stringify(obj));
       });
+
+      it('should filter the documents with external $or', () => { 
+        const obj = [
+          { x: 1, y: 1 },
+          { x: 2, y: 1 }
+        ];
+        handler.filterDocuments({ $or: [{ x: 1 }, { y: 1 }] });      
+        assert.equal(JSON.stringify(handler.getDocuments()), JSON.stringify(obj));
+      });
+
+      it('should filter the documents with internal $or', () => { 
+        const obj = [
+          { x: 1, y: 1 },
+          { x: 2, y: 1 }
+        ];
+        handler.filterDocuments({ x: { $or: [1, 2] } });      
+        assert.equal(JSON.stringify(handler.getDocuments()), JSON.stringify(obj));
+      });
+
+      it('should filter the documents with external $and', () => { 
+        const obj = [
+          { x: 1, y: 1 },
+          { x: 2, y: 1 }
+        ];
+        handler.filterDocuments({ $and: [{ x: { $gt: 0 } }, { y: { $lt: 4 } }] });      
+        assert.equal(JSON.stringify(handler.getDocuments()), JSON.stringify(obj));
+      });
+
+      it('should filter the documents with internal $and', () => { 
+        const obj = [
+          { x: 1, y: 1 },
+          { x: 2, y: 1 }
+        ];
+        handler.filterDocuments({ x: { $and: [{ $gt: 0 }, { $lt: 4 }] } });      
+        assert.equal(JSON.stringify(handler.getDocuments()), JSON.stringify(obj));
+      });
     });
 
     describe('.sortDocuments()', () => {

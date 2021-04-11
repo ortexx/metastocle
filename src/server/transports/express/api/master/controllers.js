@@ -33,12 +33,16 @@ module.exports.getDocuments = node => {
     try {
       const isCounting = req.body.isCounting;
       const options = node.createRequestNetworkOptions(req.body, {   
-        responseSchema: schema.getDocumentsButlerResponse({ schema: req.collection.schema, isCounting })
+        responseSchema: schema.getDocumentsButlerResponse({ 
+          duplicationKey: req.collection.duplicationKey,
+          schema: req.collection.schema, 
+          isCounting
+        })
       });
       const results = await node.requestNetwork('get-documents', options);
       
-      try {        
-        res.send(await node.handleDocumentsGettingForMaster(results, req.actions));
+      try {       
+        res.send(await node.handleDocumentsGettingForMaster(req.collection, results, req.actions));
       }
       catch(err) {
         throw new errors.WorkError(err.message, 'ERR_METASTOCLE_DOCUMENTS_HANDLER');

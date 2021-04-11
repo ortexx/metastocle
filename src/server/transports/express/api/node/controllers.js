@@ -11,9 +11,10 @@ module.exports.addDocument = node => {
       await node.collectionTest(info.collection);      
       await node.documentAvailabilityTest(info);
       document = await node.db.addDocument(info.collection, document); 
+      const collection = await node.getCollection(info.collection)
       
       if(duplicates.length) {  
-        const doc = node.db.removeDocumentSystemFields(document, ['$duplicate']);
+        const doc = node.db.removeDocumentSystemFields(document, [collection.duplicationKey]);
         node.duplicateDocument(duplicates, doc, info).catch(err => node.logger.error(err.stack));
       }
 

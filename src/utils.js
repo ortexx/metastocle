@@ -130,7 +130,7 @@ utils.DocumentsHandler = class {
         if(typeof this[key] != 'function') {
           throw new errors.WorkError(`There is no filter for key "${key}"`, 'ERR_METASTOCLE_DOCUMENTS_HANDLER_WRONG_FILTER');
         }
-
+       
         if(!this[key](value, filter[key])) {
           return false;
         }
@@ -389,6 +389,17 @@ utils.DocumentsHandler = class {
   }
 
   /**
+   * Case-insensitive version
+   * 
+   * @see utils.DocumentsHandler.prototype.$sw
+   */
+  $isw(value, filter) {
+    utils.validateSchema({ type: 'string' }, value);
+    utils.validateSchema({ type: 'string' }, filter);
+    return this.$sw(value.toLowerCase(), filter.toLowerCase());
+  }
+
+  /**
    * Check the value ends with the filter
    * 
    * @example
@@ -409,6 +420,17 @@ utils.DocumentsHandler = class {
   }
 
   /**
+   * Case-insensitive version
+   * 
+   * @see utils.DocumentsHandler.prototype.$ew
+   */
+   $iew(value, filter) {
+    utils.validateSchema({ type: 'string' }, value);
+    utils.validateSchema({ type: 'string' }, filter);
+    return this.$ew(value.toLowerCase(), filter.toLowerCase());
+  }
+
+  /**
    * Check the value matchs the filter
    * 
    * @example
@@ -426,6 +448,17 @@ utils.DocumentsHandler = class {
     utils.validateSchema({ type: 'string' }, value);
     utils.validateSchema({ type: 'string' }, filter);
     return !!value.match(filter);
+  }
+
+  /**
+   * Case-insensitive version
+   * 
+   * @see utils.DocumentsHandler.prototype.$lk
+   */
+   $ilk(value, filter) {
+    utils.validateSchema({ type: 'string' }, value);
+    utils.validateSchema({ type: 'string' }, filter);
+    return this.$lk(value.toLowerCase(), filter.toLowerCase());
   }
 
   /**

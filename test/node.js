@@ -152,7 +152,7 @@ describe('Node', () => {
       const documents = result.documents;
 
       for(let i = 0; i < documents.length; i++) {
-        assert.isFalse(documents[i].hasOwnProperty('x'));
+        assert.isFalse(Object.prototype.hasOwnProperty.call(documents[i], 'x'));
       }
     });
 
@@ -368,14 +368,15 @@ describe('Node', () => {
   describe('.uniqDocuments()', () => {
     it('should remove the duplicates', async () => {
       const arr = [ 
-        { $duplicate: 1 },
-        { $duplicate: 1 },
-        { $duplicate: 2 },
-        { $duplicate: 2 },
-        { $duplicate: 3 }
+        { $duplicate: 'a' },
+        { $duplicate: 'a' },
+        { $duplicate: 'b' },
+        { $duplicate: 'b' },
+        { $duplicate: 'c' }
       ];
 
-      assert.lengthOf(await node.uniqDocuments(arr), 3);
+      const collection = await node.getCollection('test1');
+      assert.lengthOf(await node.uniqDocuments(collection, arr), 3);
     });
   });
 

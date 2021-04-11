@@ -179,7 +179,17 @@ describe('utils', () => {
       });
 
       it('should return false', () => { 
-        assert.isFalse(handler.$sw('text', 'xt'));
+        assert.isFalse(handler.$sw('text', 'T'));
+      });
+    });
+
+    describe('.$isw()', () => {
+      it('should return true', () => { 
+        assert.isTrue(handler.$isw('Text', 'te')); 
+      });
+
+      it('should return false', () => { 
+        assert.isFalse(handler.$isw('text', 'xt'));
       });
     });
 
@@ -189,7 +199,17 @@ describe('utils', () => {
       });
 
       it('should return false', () => { 
-        assert.isFalse(handler.$ew('text', 'te'));
+        assert.isFalse(handler.$ew('text', 'Xt'));
+      });
+    });
+
+    describe('.$iew()', () => {
+      it('should return true', () => { 
+        assert.isTrue(handler.$iew('text', 'Xt')); 
+      });
+
+      it('should return false', () => { 
+        assert.isFalse(handler.$iew('text', 'te'));
       });
     });
 
@@ -199,7 +219,17 @@ describe('utils', () => {
       });
 
       it('should return false', () => { 
-        assert.isFalse(handler.$lk('text', 'go'));
+        assert.isFalse(handler.$lk('text', 'Ex'));
+      });
+    });
+
+    describe('.$ilk()', () => {
+      it('should return true', () => { 
+        assert.isTrue(handler.$ilk('text', 'Ex')); 
+      });
+
+      it('should return false', () => { 
+        assert.isFalse(handler.$ilk('text', 'go'));
       });
     });
 

@@ -125,6 +125,8 @@ In production, collections should only be created before the node is initialized
 
 * {string|string[]|array[]} __[limitationOrder="$accessedAt"]__ - sorting procedure for documents to be deleted if the limits are exceeded.
 
+* {string} __[duplicationKey="$duplicate"]__ - document duplication key.
+
 * {object} __[schema]__ - document fields structure.
 
 * {object} __[defaults]__ - default values for document fields. Each property value can be a function.
@@ -330,14 +332,29 @@ List of all filters:
     { x: { $sw: 'ab' } }
     ```
 
+* __$isw__ - check the value starts with the filter case-insensitive way.  
+    ``` 
+    { x: { $sw: 'aB' } }
+    ```
+
 * __$ew__ - check the value ends with the filter.  
     ``` 
     { x: { $ew: 'yz' } }
     ```
 
+* __$iew__ - check the value ends with the filter case-insensitive way.  
+    ``` 
+    { x: { $ew: 'Yz' } }
+    ```
+
 * __$lk__ - check the value matchs the filter.  
     ``` 
     { x: { $lk: 'lmno' } }
+    ```
+
+* __$ilk__ - check the value matchs the filter case-insensitive way.  
+    ``` 
+    { x: { $lk: 'lMNo' } }
     ```
 
 * __$rx__ - check the value matchs the regex filter.  

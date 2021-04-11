@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const utils = require('../../../../../utils');
 
 /**
  * Get the document addition info
@@ -41,15 +40,19 @@ module.exports.getDocuments = node => {
       else {
         documents = await node.db.getDocuments(req.collection.name);
       }
-
-      const result = await node.handleDocumentsGettingForSlave(documents, req.actions);
-
+       
+      const result = await node.handleDocumentsGettingForSlave(req.collection, documents, req.actions);
+      
       if(isCounting) {
-        documents = result.documents.map(d => _.pick(d, '$duplicate'));
+        documents = result.documents.map(d => _.pick(d, req.collection.duplicationKey));
       }
       else {
         documents = await node.db.accessDocuments(req.collection.name, result.accessDocuments);
-        documents = result.documents.map(d => node.db.removeDocumentSystemFields(d, ['$duplicate']));
+        documents = result.documents.map(d => node.db.removeDocumentSystemFields(d, [req.collection.duplicationKey]));
+      }
+
+      for(let i = 0; i < documents.length; i++) {
+        documents[i] = await req.collection.prepareDocumentFromSlave(documents[i]);
       }
       
       res.send({ documents });
@@ -67,7 +70,7 @@ module.exports.updateDocuments = node => {
   return async (req, res, next) => {
     try {
       let documents = await node.db.getDocuments(req.collection.name);    
-      const result = await node.handleDocumentsUpdate(documents, req.document, req.actions);
+      const result = await node.handleDocumentsUpdate(req.collection, documents, req.document, req.actions);
       documents = await node.db.updateDocuments(req.collection.name, result.documents);      
       res.send({ updated: result.documents.length });
     }
@@ -82,13 +85,11 @@ module.exports.updateDocuments = node => {
  */
 module.exports.deleteDocuments = node => {
   return async (req, res, next) => {
-    try {      
-      const collection = req.body.collection;
-      await node.collectionTest(collection); 
-      const documents = await node.db.getDocuments(collection);
-      const actions = utils.prepareDocumentDeletionActions(req.body.actions || {});
-      const result = await node.handleDocumentsDeletion(documents, actions);
-      await node.db.deleteDocuments(collection, result.documents);
+    try {
+      await node.collectionTest(req.collection.name); 
+      const documents = await node.db.getDocuments(req.collection.name);
+      const result = await node.handleDocumentsDeletion(req.collection, documents, req.actions);
+      await node.db.deleteDocuments(req.collection.name, result.documents);
       res.send({ deleted: result.documents.length });
     }
     catch(err) {

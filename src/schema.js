@@ -21,17 +21,20 @@ schema.getStatusPrettyResponse = function () {
   return _.merge(this.getStatusResponse(), _schema.getStatusPrettyResponse());
 };
 
-schema.getDocumentSystemFields = function () {
+schema.getDocumentSystemFields = function (options = {}) {
+  const props = {
+    $collection: 'string',
+    $createdAt: 'number',
+    $updatedAt: 'number', 
+    $accessedAt: 'number',      
+    $loki: 'number'
+  };
+
+  options.duplicationKey && (props[options.duplicationKey] = ['string', 'number']);
+
   return {
     type: 'object',
-    props: {
-      $duplicate: 'string',
-      $collection: 'string',
-      $createdAt: 'number',
-      $updatedAt: 'number', 
-      $accessedAt: 'number',      
-      $loki: 'number'
-    }
+    props
   }
 };
 
@@ -115,12 +118,13 @@ schema.getDocumentsSlaveResponse = function (options = {}) {
   let items = options.schema || { type: 'object' };
 
   if(options.isCounting) {
+    const props = {};
+    options.duplicationKey && (props[options.duplicationKey] = ['string', 'number']);
+
     items = { 
       type: 'object', 
-      props: { 
-        $duplicate: 'string' 
-      },
-      strong: true
+      props,
+      strict: true
     }
   }
 

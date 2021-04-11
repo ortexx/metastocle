@@ -197,7 +197,7 @@ module.exports = (Parent) => {
       const extDoc = this.extractDocumentExistenceInfo(existing);
       const preparedExtDoc = extDoc? await collection.prepareDocumentToGet(extDoc): null;
       document = extDoc? extDoc: document;
-      document = _.merge(document, { $duplicate: document.$duplicate });    
+      document = _.merge(document, { [collection.duplicationKey]: document[collection.duplicationKey] });    
       
       if(limit <= 0) {
         return existenceErrFn();
@@ -294,9 +294,13 @@ module.exports = (Parent) => {
       const results = await this.requestNetwork('get-documents', {
         body: { actions, collection: collectionName, isCounting, pkValue },
         timeout: options.timeout,
-        responseSchema: schema.getDocumentsMasterResponse({ schema: collection.schema, isCounting })
+        responseSchema: schema.getDocumentsMasterResponse({ 
+          duplicationKey: collection.duplicationKey,
+          schema: collection.schema, 
+          isCounting 
+        })
       });
-      return await this.handleDocumentsGettingForClient(results, collection, actions);
+      return await this.handleDocumentsGettingForClient(collection, results, actions);
     }
 
     /**
@@ -350,29 +354,30 @@ module.exports = (Parent) => {
      * Handle the documents getting on the master side
      * 
      * @async
+     * @param {object} collection
      * @param {array} arr
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsGettingForButler(arr, actions = {}) {
+    async handleDocumentsGettingForButler(collection, arr, actions = {}) {
       let documents = arr.reduce((p, c) => p.concat(c.documents), []);
-      actions.removeDuplicates && (documents = this.uniqDocuments(documents));
+      actions.removeDuplicates && (documents = this.uniqDocuments(collection, documents));
       return { documents };
     }
     
     /**
      * Handle the documents getting on the client side
      * 
-     * @async
-     * @param {array} arr
+     * @async 
      * @param {object} collection
+     * @param {array} arr
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsGettingForClient(arr, collection, actions = {}) { 
+    async handleDocumentsGettingForClient(collection, arr, actions = {}) {
       let documents = arr.reduce((p, c) => p.concat(c.documents), []);
-      actions.removeDuplicates && (documents = this.uniqDocuments(documents));
-      const handler = new utils.DocumentsHandler(documents);
+      actions.removeDuplicates && (documents = this.uniqDocuments(collection, documents));
+      const handler = new collection.constructor.DocumentsHandler(documents);
       actions.sort && handler.sortDocuments(actions.sort);
       const totalCount = handler.getDocuments().length;
       (actions.limit || actions.offset) && handler.limitDocuments(actions.offset, actions.limit);
@@ -389,12 +394,13 @@ module.exports = (Parent) => {
      * Handle the documents getting on the slave side
      * 
      * @async
+     * @param {object} collection
      * @param {object[]} documents
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsGettingForSlave(documents, actions = {}) { 
-      const handler = new utils.DocumentsHandler(documents);
+    async handleDocumentsGettingForSlave(collection, documents, actions = {}) {
+      const handler = new collection.constructor.DocumentsHandler(documents);
       actions.filter && handler.filterDocuments(actions.filter); 
       const accessDocuments = handler.getDocuments(); 
       actions.fields && handler.fieldDocuments(actions.fields); 
@@ -406,13 +412,14 @@ module.exports = (Parent) => {
      * Handle the documents update on the slave side
      * 
      * @async
+     * @param {object} collection
      * @param {object[]} documents
      * @param {object} document
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsUpdate(documents, document, actions = {}) {      
-      const handler = new utils.DocumentsHandler(documents);      
+    async handleDocumentsUpdate(collection, documents, document, actions = {}) {      
+      const handler = new collection.constructor.DocumentsHandler(documents);      
       actions.filter && handler.filterDocuments(actions.filter);
       documents = handler.getDocuments().map(d => {
         if(actions.replace) {
@@ -428,12 +435,13 @@ module.exports = (Parent) => {
      * Handle the documents deletion on the slave side
      * 
      * @async
+     * @param {object} collection
      * @param {object[]} documents
      * @param {object} [actions]
      * @returns {object}
      */
-    async handleDocumentsDeletion(documents, actions = {}) {
-      const handler = new utils.DocumentsHandler(documents);
+    async handleDocumentsDeletion(collection, documents, actions = {}) {
+      const handler = new collection.constructor.DocumentsHandler(documents);
       actions.filter && handler.filterDocuments(actions.filter);     
       documents = handler.getDocuments();
       return { documents };
@@ -599,11 +607,12 @@ module.exports = (Parent) => {
     /**
      * Remove the document duplicates
      * 
+     * @param {object} collection
      * @param {object[]} documents
      * @returns {object[]}
      */
-    uniqDocuments(documents) {
-      const group = Object.values(_.groupBy(documents, '$duplicate'));      
+    uniqDocuments(collection, documents) {
+      const group = Object.values(_.groupBy(documents, collection.duplicationKey));       
       return group.map(d => this.chooseDocumentsDuplicate(d)).filter(d => d);
     }
 
@@ -611,9 +620,10 @@ module.exports = (Parent) => {
      * Create the document schema
      * 
      * @param {object} scheme
+     * @param {string} duplicationKey
      * @returns {object}
      */
-    createDocumentFullSchema(scheme) {
+    createDocumentFullSchema(scheme, duplicationKey) {
       if(scheme && typeof scheme != 'object' || Array.isArray(scheme)) {
         throw new Error('Document schema must be an object');
       }
@@ -622,7 +632,7 @@ module.exports = (Parent) => {
         return;
       }
 
-      scheme = _.merge({ expected: true }, scheme, schema.getDocumentSystemFields());
+      scheme = _.merge({ expected: true }, scheme, schema.getDocumentSystemFields({ duplicationKey }));
       return scheme;
     }    
 

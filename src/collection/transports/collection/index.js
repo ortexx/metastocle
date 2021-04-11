@@ -6,6 +6,8 @@ module.exports = (Parent) => {
    * Collection transport
    */
   return class Collection extends (Parent || Service) {
+    static get DocumentsHandler () { return utils.DocumentsHandler }
+
     /**
      * @param {object} [options]
      */
@@ -17,7 +19,8 @@ module.exports = (Parent) => {
         maxSize: 0,
         queue: false,
         preferredDuplicates: "auto",
-        limitationOrder: '$accessedAt'
+        limitationOrder: '$accessedAt',
+        duplicationKey: '$duplicate'
       }, options);      
     }
 
@@ -25,7 +28,7 @@ module.exports = (Parent) => {
      * @see Service.prototype.init
      */
     async init() {    
-      this.schema = this.node.createDocumentFullSchema(this.schema);
+      this.schema = this.node.createDocumentFullSchema(this.schema, this.duplicationKey);
       this.maxSize = utils.getBytes(this.maxSize);
       await this.node.db.addCollection(this.name, this);
       await super.init.apply(this, arguments);
@@ -70,6 +73,17 @@ module.exports = (Parent) => {
      */
     async prepareDocumentToGet(doc) {
       return this.node.db.removeDocumentSystemFields(doc);
+    }
+
+    /**
+     * Prepare the document from the slave
+     * 
+     * @async
+     * @param {object} doc
+     * @returns {object}
+     */
+    async prepareDocumentFromSlave(doc) {
+      return doc;
     }
 
     /**

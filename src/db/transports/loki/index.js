@@ -209,7 +209,7 @@ module.exports = (Parent) => {
 
       delete document.$loki;
       document.$createdAt = document.$updatedAt = document.$accessedAt = Date.now();      
-      document.$duplicate = document.$duplicate || this.createDocumentDuplicationKey(document);
+      document[collection.duplicationKey] = document[collection.duplicationKey] || this.createDocumentDuplicationKey(document);
       document.$collection = name;
       document = await this.handleDocument(document);
 
@@ -322,8 +322,8 @@ module.exports = (Parent) => {
         }
       }
 
-      if(!document.$loki && this.col[fullName].chain().find({ $duplicate: document.$duplicate }).count()) {
-        const msg = `The duplicate key "${document.$duplicate}" already exists`;
+      if(!document.$loki && this.col[fullName].chain().find({ [collection.duplicationKey]: document[collection.duplicationKey] }).count()) {
+        const msg = `The duplicate key "${document[collection.duplicationKey]}" already exists`;
         throw new errors.WorkError(msg, 'ERR_METASTOCLE_DOCUMENT_DUPLICATE_EXISTS');
       }
 

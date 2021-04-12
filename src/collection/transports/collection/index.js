@@ -78,22 +78,20 @@ module.exports = (Parent) => {
     /**
      * Prepare the document from the slave
      * 
-     * @async
-     * @param {object} doc
-     * @returns {object|null}
+     * @see Collection.prototype.prepareDocumentFromNode
      */
-    async prepareDocumentFromSlave(doc) {
-      return doc;
+    async prepareDocumentFromSlave() {
+      return await this.prepareDocumentFromNode.apply(this, arguments);
     }
 
     /**
-     * Prepare the document to the slave
+     * Prepare the document from the node
      * 
      * @async
      * @param {object} doc
      * @returns {object|null}
      */
-    async prepareDocumentToSlave(doc) {
+    async prepareDocumentFromNode(doc) {
       return doc;
     }
 

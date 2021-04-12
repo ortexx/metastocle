@@ -19,6 +19,7 @@ module.exports.addDocument = node => {
       }
 
       document = node.db.removeDocumentSystemFields(document);
+      document = await collection.prepareDocumentFromNode(document);
       res.send({ document });
     }
     catch(err) {

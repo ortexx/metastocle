@@ -40,6 +40,15 @@ module.exports.getDocuments = node => {
       else {
         documents = await node.db.getDocuments(req.collection.name);
       }
+      
+      for(let i = 0; i < documents.length; i++) {
+        documents[i] = await req.collection.prepareDocumentToSlave(documents[i]);
+        
+        if(!documents[i]) {
+          documents.splice(i, 1);
+          i--;
+        }
+      }
        
       const result = await node.handleDocumentsGettingForSlave(req.collection, documents, req.actions);
       
@@ -53,6 +62,11 @@ module.exports.getDocuments = node => {
 
       for(let i = 0; i < documents.length; i++) {
         documents[i] = await req.collection.prepareDocumentFromSlave(documents[i]);
+        
+        if(!documents[i]) {
+          documents.splice(i, 1);
+          i--;
+        }
       }
       
       res.send({ documents });

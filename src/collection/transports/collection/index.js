@@ -80,9 +80,20 @@ module.exports = (Parent) => {
      * 
      * @async
      * @param {object} doc
-     * @returns {object}
+     * @returns {object|null}
      */
     async prepareDocumentFromSlave(doc) {
+      return doc;
+    }
+
+    /**
+     * Prepare the document to the slave
+     * 
+     * @async
+     * @param {object} doc
+     * @returns {object|null}
+     */
+    async prepareDocumentToSlave(doc) {
       return doc;
     }
 

@@ -151,7 +151,7 @@ describe('group communication', () => {
   });
 
   it('should add documents in parallel', async () => {
-    const length = 10;  
+    const length = 5;  
     const p = [];
     let count = 0;
 

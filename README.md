@@ -2,6 +2,8 @@
 
 Metastocle is a decentralized data storage based on [the spreadable protocol](https://github.com/ortexx/spreadable/).
 
+There is [an article here](https://ortex.medium.com/metastocle-a-decentralized-data-storage-bf3dc4c8dbf2) with an explanation. 
+
 ```javascript
 const Node = require('metastocle').Node;
 

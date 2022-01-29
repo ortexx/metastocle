@@ -165,7 +165,7 @@ describe('group communication', () => {
     for(let i = 0; i < nodes.length; i++) {
       count += (await nodes[i].db.getDocuments(collection)).length;
     }
-
+    
     assert.isOk(count == length * duplicates);
   });
 });

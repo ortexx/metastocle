@@ -1,4 +1,4 @@
-const utils = Object.assign({}, require('spreadable/bin/utils'));
+const utils = Object.assign({}, require('spreadable-ms/bin/utils'));
 const scrUtils = require('../src/utils');
 
 /**

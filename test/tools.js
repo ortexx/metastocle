@@ -1,1 +1,1 @@
-module.exports = Object.assign({}, require('spreadable/test/tools'));
+module.exports = Object.assign({}, require('spreadable-ms/test/tools'));

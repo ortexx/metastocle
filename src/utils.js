@@ -1,4 +1,4 @@
-const utils = Object.assign({}, require('spreadable/src/utils'));
+const utils = Object.assign({}, require('spreadable-ms/src/utils'));
 const merge = require('lodash/merge');
 const orderBy = require('lodash/orderBy');
 const pickBy = require('lodash/pickBy');

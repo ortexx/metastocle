@@ -1,5 +1,5 @@
 const utils = require('../../../utils');
-const midds = Object.assign({}, require("spreadable/src/server/transports/express/midds"));
+const midds = Object.assign({}, require("spreadable-ms/src/server/transports/express/midds"));
 
 /**
  * Prepare collection info

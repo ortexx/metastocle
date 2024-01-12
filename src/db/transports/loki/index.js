@@ -1,5 +1,5 @@
 const DatabaseMetastocle = require('../database')();
-const DatabaseLoki = require('spreadable/src/db/transports/loki')(DatabaseMetastocle);
+const DatabaseLoki = require('spreadable-ms/src/db/transports/loki')(DatabaseMetastocle);
 const _ = require('lodash');
 const sizeof = require("object-sizeof");
 const utils = require('../../../utils');

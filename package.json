@@ -1,16 +1,16 @@
 {
-  "name": "metastocle",
+  "name": "metastocle-ms",
   "version": "0.2.31",
-  "description": "Decentralized data storage",
+  "description": "Decentralized data storage for MetaSound",
   "main": "./src/index.js",
   "bin": {
     "metastocle": "./bin/index.js"
   },
   "author": {
-    "name": "Alexander Balasyan",
-    "email": "mywebstreet@gmail.com"
+    "name": "MetaSound",
+    "email": "info@metasound.com"
   },
-  "homepage": "https://github.com/ortexx/metastocle",
+  "homepage": "https://github.com/metasound/metastocle",
   "scripts": {
     "eslint": "eslint src bin test",
     "test": "mocha ./test/index.js --timeout=20000",
@@ -63,12 +63,12 @@
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
     "object-sizeof": "^1.6.1",
-    "spreadable": "https://github.com/metasound/spreadable.git",
+    "spreadable-ms": "^0.2.28",
     "uuid": "^3.3.3"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ortexx/metastocle"
+    "url": "https://github.com/metasound/metastocle"
   },
   "engines": {
     "node": ">=10.13.0"

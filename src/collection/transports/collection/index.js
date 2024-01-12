@@ -1,4 +1,4 @@
-const Service = require('spreadable/src/service')();
+const Service = require('spreadable-ms/src/service')();
 const utils = require('../../../utils');
 
 module.exports = (Parent) => {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
+import * as runner from "./runner.js";
+import { Node } from "../src/index.js";
+import actions from "./actions.js";
 
-const runner = require('./runner');
-const Node = require('../src').Node;
-const actions = require('./actions');
 runner('metastocle', Node, actions);

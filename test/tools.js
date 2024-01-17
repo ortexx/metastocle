@@ -1,1 +1,2 @@
-module.exports = Object.assign({}, require('spreadable-ms/test/tools'));
+import tools from "spreadable-ms/test/tools.js";
+export default Object.assign({}, tools);

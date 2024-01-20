@@ -1,6 +1,6 @@
-import service from "spreadable-ms/src/service.js";
+import Service from "spreadable-ms/src/service.js";
 import utils from "../../../utils.js";
-const Service = service();
+
 export default (Parent) => {
     /**
      * Collection transport

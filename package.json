@@ -1,6 +1,6 @@
 {
   "name": "metastocle-ms",
-  "version": "0.3.30",
+  "version": "0.3.31",
   "description": "Decentralized data storage for MetaSound",
   "main": "./src/index.js",
   "type": "module",

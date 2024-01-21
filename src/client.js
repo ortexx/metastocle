@@ -2,10 +2,10 @@ import _ from "lodash";
 import client from "spreadable-ms/src/client.js";
 import utils from "./utils.js";
 import errors from "./errors.js";
-import fse from "fs-extra";
+import pack from "../package.json" assert { type: "json" }
 
-const pack = JSON.parse(fse.readFileSync(new URL("../package.json", import.meta.url)));
 const Client = client();
+
 export default (Parent) => {
     /**
      * Class to manage client requests to the network

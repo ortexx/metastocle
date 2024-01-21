@@ -6,9 +6,8 @@ import node from "spreadable-ms/src/node.js";
 import utils from "./utils.js";
 import errors from "./errors.js";
 import schema from "./schema.js";
-import fse from "fs-extra";
+import pack from "../package.json" assert { type: "json" }
 
-const pack = JSON.parse(fse.readFileSync(new URL("../package.json", import.meta.url)));
 const DatabaseLokiMetastocle = loki();
 const ServerExpressMetastocle = express();
 const Collection = collection();

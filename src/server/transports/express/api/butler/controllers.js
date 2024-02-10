@@ -1,4 +1,4 @@
-import _ from "lodash";
+import pick from "lodash-es/pick.js";
 import errors from "../../../../../errors.js";
 import schema from "../../../../../schema.js";
 export const getDocumentAdditionInfo = node => {
@@ -11,7 +11,7 @@ export const getDocumentAdditionInfo = node => {
                 responseSchema: schema.getDocumentAdditionInfoSlaveResponse({ schema: collection.schema }),
             });
             const results = await node.requestNetwork('get-document-addition-info', options);
-            const existing = results.filter(c => c.existenceInfo).map(c => _.pick(c, ['address', 'existenceInfo']));
+            const existing = results.filter(c => c.existenceInfo).map(c => pick(c, ['address', 'existenceInfo']));
             const candidates = await node.filterCandidates(results, await node.getDocumentAdditionInfoFilterOptions(info));
             res.send({ candidates, existing });
         }

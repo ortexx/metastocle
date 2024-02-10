@@ -1,12 +1,12 @@
-import _ from "lodash";
-import loki from "./db/transports/loki/index.js";
-import express from "./server/transports/express/index.js";
-import collection from "./collection/transports/collection/index.js";
+import { assign, flatten, get, groupBy, isPlainObject, merge, omitBy, orderBy } from "lodash-es";
 import node from "spreadable-ms/src/node.js";
-import utils from "./utils.js";
+import pack from "../package.json" assert { type: "json" };
+import collection from "./collection/transports/collection/index.js";
+import loki from "./db/transports/loki/index.js";
 import errors from "./errors.js";
 import schema from "./schema.js";
-import pack from "../package.json" assert { type: "json" }
+import express from "./server/transports/express/index.js";
+import utils from "./utils.js";
 
 const DatabaseLokiMetastocle = loki();
 const ServerExpressMetastocle = express();
@@ -26,7 +26,7 @@ export default (Parent) => {
          * @see Node
          */
         constructor(options = {}) {
-            options = _.merge({
+            options = merge({
                 request: {
                     documentAdditionNodeTimeout: '2s'
                 },
@@ -57,7 +57,7 @@ export default (Parent) => {
             for (let i = 0; i < collections.length; i++) {
                 documents.push(await this.db.getCollectionSize(collections[i]));
             }
-            return _.merge(await super.getStatusInfo(pretty), {
+            return merge(await super.getStatusInfo(pretty), {
                 collections,
                 documents
             });
@@ -89,7 +89,7 @@ export default (Parent) => {
          * @param {Collection} collection
          */
         async addCollection(name, collection) {
-            _.isPlainObject(collection) && (collection = new Collection(collection));
+            isPlainObject(collection) && (collection = new Collection(collection));
             if (this.__initialized) {
                 this.logger.warn(`Add collection "${name}" before the node initialization`);
             }
@@ -166,20 +166,20 @@ export default (Parent) => {
             const collection = await this.getCollection(collectionName);
             const info = { collection: collectionName };
             document = await collection.prepareDocumentToAdd(document);
-            collection.pk && (info.pkValue = _.get(document, collection.pk));
+            collection.pk && (info.pkValue = get(document, collection.pk));
             const masterRequestTimeout = await this.getRequestMasterTimeout();
             const results = await this.requestNetwork('get-document-addition-info', {
                 body: { info },
                 timeout: timer([masterRequestTimeout, this.options.request.documentAdditionNodeTimeout], { min: masterRequestTimeout, grabFree: true }),
                 responseSchema: schema.getDocumentAdditionInfoMasterResponse({ schema: collection.schema })
             });
-            const existing = _.flatten(results).reduce((p, c) => p.concat(c.existing), []);
+            const existing = flatten(results).reduce((p, c) => p.concat(c.existing), []);
             const duplicatesCount = await this.getDocumentDuplicatesCount(info);
             const limit = duplicatesCount - existing.length;
             const extDoc = this.extractDocumentExistenceInfo(existing);
             const preparedExtDoc = extDoc ? await collection.prepareDocumentToGet(extDoc) : null;
             document = extDoc ? extDoc : document;
-            document = _.merge(document, { [collection.duplicationKey]: document[collection.duplicationKey] });
+            document = merge(document, { [collection.duplicationKey]: document[collection.duplicationKey] });
             if (limit <= 0) {
                 return existenceErrFn();
             }
@@ -385,9 +385,9 @@ export default (Parent) => {
             actions.filter && handler.filterDocuments(actions.filter);
             documents = handler.getDocuments().map(d => {
                 if (actions.replace) {
-                    return _.merge({}, _.omitBy(d, (v, k) => !k.startsWith('$')), document);
+                    return merge({}, omitBy(d, (v, k) => !k.startsWith('$')), document);
                 }
-                return _.merge({}, d, _.omitBy(document, (v, k) => k.startsWith('$')));
+                return merge({}, d, omitBy(document, (v, k) => k.startsWith('$')));
             });
             return { documents };
         }
@@ -419,7 +419,7 @@ export default (Parent) => {
          */
         async duplicateDocument(servers, document, info, options = {}) {
             const collection = await this.getCollection(info.collection);
-            options = _.assign({
+            options = assign({
                 responseSchema: schema.getDocumentAdditionResponse({ schema: collection.schema })
             }, options);
             options.body = { info, document };
@@ -545,7 +545,7 @@ export default (Parent) => {
          * @returns {object|null}
          */
         chooseDocumentsDuplicate(arr) {
-            arr = _.orderBy(arr, ['$createdAt'], ['asc']);
+            arr = orderBy(arr, ['$createdAt'], ['asc']);
             return arr[0] || null;
         }
         /**
@@ -556,7 +556,7 @@ export default (Parent) => {
          * @returns {object[]}
          */
         uniqDocuments(collection, documents) {
-            const group = Object.values(_.groupBy(documents, collection.duplicationKey));
+            const group = Object.values(groupBy(documents, collection.duplicationKey));
             return group.map(d => this.chooseDocumentsDuplicate(d)).filter(d => d);
         }
         /**
@@ -573,7 +573,7 @@ export default (Parent) => {
             if (!scheme) {
                 return;
             }
-            scheme = _.merge({ expected: true }, scheme, schema.getDocumentSystemFields({ duplicationKey }));
+            scheme = merge({ expected: true }, scheme, schema.getDocumentSystemFields({ duplicationKey }));
             return scheme;
         }
         /**

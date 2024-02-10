@@ -1,10 +1,10 @@
-import database from "../database/index.js";
-import loki from "spreadable-ms/src/db/transports/loki/index.js";
-import _ from "lodash";
+import { merge, camelCase, capitalize, get, pickBy, set } from "lodash-es";
 import sizeof from "object-sizeof";
-import utils from "../../../utils.js";
+import loki from "spreadable-ms/src/db/transports/loki/index.js";
+import { v1 as uuidv1 } from "uuid";
 import errors from "../../../errors.js";
-import {v1 as uuidv1} from "uuid";
+import utils from "../../../utils.js";
+import database from "../database/index.js";
 
 const DatabaseMetastocle = database();
 const DatabaseLoki = loki(DatabaseMetastocle);
@@ -14,7 +14,7 @@ export default (Parent) => {
      */
     return class DatabaseLokiMetastocle extends (Parent || DatabaseLoki) {
         constructor(options = {}) {
-            options = _.merge({
+            options = merge({
                 metaPrefix: 'meta'
             }, options);
             super(options);
@@ -23,7 +23,7 @@ export default (Parent) => {
          * @see DatabaseMetastocle.prototype.createCollectionName
          */
         createCollectionName(name) {
-            return this.options.metaPrefix + _.capitalize(name);
+            return this.options.metaPrefix + capitalize(name);
         }
         /**
          * @see DatabaseMetastocle.prototype.createDocumentPrimaryKey
@@ -41,7 +41,7 @@ export default (Parent) => {
          * @see DatabaseMetastocle.prototype.removeDocumentSystemFields
          */
         removeDocumentSystemFields(document, exclude = []) {
-            return _.pickBy(document, (v, k) => !k.startsWith('$') || (exclude.length && exclude.includes(k)));
+            return pickBy(document, (v, k) => !k.startsWith('$') || (exclude.length && exclude.includes(k)));
         }
         /**
          * @see DatabaseMetastocle.prototype.addCollection
@@ -86,7 +86,7 @@ export default (Parent) => {
                 if (!collection.name.startsWith(this.options.metaPrefix)) {
                     continue;
                 }
-                const name = _.camelCase(collection.name.substring(this.options.metaPrefix.length));
+                const name = camelCase(collection.name.substring(this.options.metaPrefix.length));
                 const nodeCollection = await this.node.getCollection(name);
                 if (!nodeCollection) {
                     await this.removeCollection(name);
@@ -198,18 +198,18 @@ export default (Parent) => {
             if (collection.defaults) {
                 for (let key in collection.defaults) {
                     const handler = collection.defaults[key];
-                    if (_.get(document, key) !== undefined) {
+                    if (get(document, key) !== undefined) {
                         continue;
                     }
-                    _.set(document, key, typeof handler == 'function' ? await handler(key, document, prevDocument) : handler);
+                    set(document, key, typeof handler == 'function' ? await handler(key, document, prevDocument) : handler);
                 }
             }
             if (collection.setters) {
                 for (let key in collection.setters) {
                     const handler = collection.setters[key];
-                    const current = _.get(document, key);
+                    const current = get(document, key);
                     const value = typeof handler == 'function' ? await handler(current, key, document, prevDocument) : handler;
-                    _.set(document, key, value);
+                    set(document, key, value);
                 }
             }
             return document;
@@ -226,8 +226,8 @@ export default (Parent) => {
             if (collection.getters) {
                 for (let key in collection.getters) {
                     const handler = collection.getters[key];
-                    const value = _.get(document, key);
-                    _.set(document, key, typeof handler == 'function' ? await handler(value, key, document) : handler);
+                    const value = get(document, key);
+                    set(document, key, typeof handler == 'function' ? await handler(value, key, document) : handler);
                 }
             }
             return document;

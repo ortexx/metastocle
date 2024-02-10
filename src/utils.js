@@ -1,5 +1,5 @@
+import { get, merge, orderBy, pick, pickBy } from "lodash-es";
 import _utils from "spreadable-ms/src/utils.js";
-import _ from "lodash";
 import errors from "./errors.js";
 const utils = Object.assign({}, _utils);
 /**
@@ -50,7 +50,7 @@ utils.DocumentsHandler = class {
             fields.push(field);
             directions.push(direction);
         }
-        this.__documents = _.orderBy(this.__documents, fields, directions);
+        this.__documents = orderBy(this.__documents, fields, directions);
     }
     /**
      * Limit the documents
@@ -63,7 +63,7 @@ utils.DocumentsHandler = class {
         this.__documents = this.__documents.slice(start, start + limit);
     }
     /**
-     * _.pick the documents fields
+     * pick the documents fields
      *
      * @param {string[]} fields
      */
@@ -71,7 +71,7 @@ utils.DocumentsHandler = class {
         if (!Array.isArray(fields)) {
             throw new errors.WorkError(`Fields must be an array`, 'ERR_METASTOCLE_DOCUMENTS_HANDLER_FIELD_TYPE');
         }
-        this.__documents = this.__documents.map(d => _.pickBy(d, (v, k) => fields.includes(k) || k.startsWith('$')));
+        this.__documents = this.__documents.map(d => pickBy(d, (v, k) => fields.includes(k) || k.startsWith('$')));
     }
     /**
      * Check the document value
@@ -115,7 +115,7 @@ utils.DocumentsHandler = class {
                 }
                 continue;
             }
-            if (!this.checkDocumentValue(_.get(value, key), filter[key])) {
+            if (!this.checkDocumentValue(get(value, key), filter[key])) {
                 return false;
             }
         }
@@ -632,13 +632,13 @@ utils.prepareDocumentFields = function (fields) {
  */
 utils.prepareDocumentGettingActions = function (actions) {
     this.actionsTest(actions);
-    return _.merge({
+    return merge({
         sort: null,
         fields: null,
         offset: 0,
         limit: 0,
         removeDuplicates: true
-    }, _.pick(actions, ['filter', 'sort', 'fields', 'offset', 'limit', 'removeDuplicates']), {
+    }, pick(actions, ['filter', 'sort', 'fields', 'offset', 'limit', 'removeDuplicates']), {
         filter: actions.filter ? this.prepareDocumentFilter(actions.filter) : null
     });
 };
@@ -650,9 +650,9 @@ utils.prepareDocumentGettingActions = function (actions) {
  */
 utils.prepareDocumentUpdateActions = function (actions) {
     this.actionsTest(actions);
-    return _.merge({
+    return merge({
         replace: false,
-    }, _.pick(actions, ['replace', 'filter']), {
+    }, pick(actions, ['replace', 'filter']), {
         filter: actions.filter ? this.prepareDocumentFilter(actions.filter) : null
     });
 };
@@ -664,7 +664,7 @@ utils.prepareDocumentUpdateActions = function (actions) {
  */
 utils.prepareDocumentDeletionActions = function (actions) {
     this.actionsTest(actions);
-    return _.merge({}, _.pick(actions, ['filter']), {
+    return merge({}, pick(actions, ['filter']), {
         filter: actions.filter ? this.prepareDocumentFilter(actions.filter) : null
     });
 };

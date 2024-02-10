@@ -1,4 +1,4 @@
-import _ from "lodash";
+import pick from "lodash-es/pick.js";
 export const getDocumentAdditionInfo = node => {
     return async (req, res, next) => {
         try {
@@ -33,7 +33,7 @@ export const getDocuments = node => {
             }
             const result = await node.handleDocumentsGettingForSlave(req.collection, documents, req.actions);
             if (isCounting) {
-                documents = result.documents.map(d => _.pick(d, req.collection.duplicationKey));
+                documents = result.documents.map(d => pick(d, req.collection.duplicationKey));
             }
             else {
                 documents = await node.db.accessDocuments(req.collection.name, result.accessDocuments);

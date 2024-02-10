@@ -1,6 +1,6 @@
 # [Metastocle](https://github.com/metasound/metastocle/) [alpha] [![npm version](https://badge.fury.io/js/metastocle.svg)](https://badge.fury.io/js/metastocle) [![Build status](https://github.com/metasound/metastocle/workflows/build/badge.svg)](https://github.com/metasound/metastocle/actions)
 
-Metastocle is a decentralized data storage based on [the spreadable protocol](https://github.com/metasound/spreadable-ms/).
+Metastocle is a decentralized data storage based on [the spreadable protocol](https://github.com/metasound/spreadable/).
 
 There is [an article here](https://ortex.medium.com/metastocle-a-decentralized-data-storage-bf3dc4c8dbf2) with an explanation. 
 
@@ -80,21 +80,21 @@ const Client = require('metastocle').Client;
 This is only part of the ability to work with collections and documents.
 
 ## Browser client
-You can also use the client in a browser. Look at the description of [the spreadable library](https://github.com/metasound/spreadable-ms/#how-to-use-the-client-in-a-browser). In window you have __window.ClientMetastocle__ instead of __window.ClientSpreadable__. The prepared file name is __metastocle.client.js__.
+You can also use the client in a browser. Look at the description of [the spreadable library](https://github.com/metasound/spreadable/#how-to-use-the-client-in-a-browser). In window you have __window.ClientMetastocle__ instead of __window.ClientSpreadable__. The prepared file name is __metastocle.client.js__.
 
 ## How to use it via the command line
-Look at the description of [the spreadable library](https://github.com/metasound/spreadable-ms/#how-to-use-it-via-the-command-line). You only need to change everywhere **spreadable** word to **metastocle**.
+Look at the description of [the spreadable library](https://github.com/metasound/spreadable/#how-to-use-it-via-the-command-line). You only need to change everywhere **spreadable** word to **metastocle**.
 
 ## How it works
 
-Nodes interact via [the spreadable mechanism](https://github.com/metasound/spreadable-ms/). The data can be added to the network through any node. You can create collection and put documents into them. There are various __CRUD__ document management methods. For better reliability documents can be duplicated. How exactly you can customize yourself. By default, each one tends to have its copies in amount of __Math.ceil(Math.sqrt(networkSize))__.
+Nodes interact via [the spreadable mechanism](https://github.com/metasound/spreadable/). The data can be added to the network through any node. You can create collection and put documents into them. There are various __CRUD__ document management methods. For better reliability documents can be duplicated. How exactly you can customize yourself. By default, each one tends to have its copies in amount of __Math.ceil(Math.sqrt(networkSize))__.
 
 ## What are the limitations
 
 It is necessary to understand that the library is not a full-fledged database, but a distributed information storage with an interface similar to non-relational databases. It is not optimized for processing large amounts of data on a node. By default, each node uses an in-memory database for storing. The point is to distribute data among a large number of nodes. Therefore, if your project is of this nature, then this solution may work. So you can limit the size of your collections on one node in accordance with the available RAM. But keep in mind, the larger the database, the longer it will be stored in the file. This can lead to delays when working with your application.
 
 ## What are the requirements
-Look at [the spreadable requirements](https://github.com/metasound/spreadable-ms/#what-are-the-requirements).
+Look at [the spreadable requirements](https://github.com/metasound/spreadable/#what-are-the-requirements).
 
 ## Where to use it
 
@@ -168,7 +168,7 @@ If you need to have a strict field structure, then it can be defined as:
 } 
 ```
 
-This kind of a schema is handled by [utils.validateSchema](https://github.com/metasound/spreadable-ms/blob/master/src/utils.js) function, where you can find all the rules.
+This kind of a schema is handled by [utils.validateSchema](https://github.com/metasound/spreadable/blob/master/src/utils.js) function, where you can find all the rules.
 
 ## Defaults, setters and getters
 

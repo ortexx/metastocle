@@ -65,7 +65,7 @@
     "lodash-es": "^4.17.21",
     "node-fetch": "^3.3.2",
     "object-sizeof": "^2.6.3",
-    "spreadable-ms": "^0.3.38",
+    "spreadable-ms": "latest",
     "uuid": "^9.0.1"
   },
   "repository": {

@@ -1,4 +1,4 @@
-import express from "spreadable-ms/src/server/transports/express/index.js";
+import express from "spreadable/src/server/transports/express/index.js";
 import routes from "./routes.js";
 import routesClient from "./client/routes.js";
 import routesApi from "./api/routes.js";
@@ -6,11 +6,11 @@ import routesApiMaster from "./api/master/routes.js";
 import routesApiButler from "./api/butler/routes.js";
 import routesApiSlave from "./api/slave/routes.js";
 import routesApiNode from "./api/node/routes.js";
+
 const ServerExpress = express();
 
 export default (Parent) => {
   return class ServerExpressMetastocle extends (Parent || ServerExpress) {
-
     /**
      * @see ServerExpress.prototype.getMainRoutes
      */

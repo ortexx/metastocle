@@ -1,6 +1,6 @@
 import { merge, camelCase, capitalize, get, pickBy, set } from "lodash-es";
 import sizeof from "object-sizeof";
-import loki from "spreadable-ms/src/db/transports/loki/index.js";
+import loki from "spreadable/src/db/transports/loki/index.js";
 import { v1 as uuidv1 } from "uuid";
 import errors from "../../../errors.js";
 import utils from "../../../utils.js";
@@ -10,7 +10,6 @@ const DatabaseMetastocle = database();
 const DatabaseLoki = loki(DatabaseMetastocle);
 
 export default (Parent) => {
-
   /**
    * Lokijs database transport
    */
@@ -55,10 +54,12 @@ export default (Parent) => {
      */
     async addCollection(name, options = {}) {
       const lokiOptions = Object.assign({}, options.loki || {});
+
       if (options.pk) {
         !lokiOptions.unique && (lokiOptions.unique = []);
         !lokiOptions.unique.includes(options.pk) && (lokiOptions.unique.push(options.pk));
       }
+
       const fullName = this.createCollectionName(name);
       this.col[fullName] = this.prepareCollection(fullName, lokiOptions);
       return this.col[fullName];
@@ -92,24 +93,31 @@ export default (Parent) => {
      */
     async normalizeCollections() {
       const collections = this.loki.listCollections();
+
       for (let i = 0; i < collections.length; i++) {
         const collection = collections[i];
+
         if (!collection.name.startsWith(this.options.metaPrefix)) {
           continue;
         }
+
         const name = camelCase(collection.name.substring(this.options.metaPrefix.length));
         const nodeCollection = await this.node.getCollection(name);
+
         if (!nodeCollection) {
           await this.removeCollection(name);
           continue;
         }
+
         const pk = nodeCollection.pk;
+
         if (pk) {
           this.col[collection.name]
             .chain()
             .where(doc => !doc[pk] || (typeof doc[pk] != 'string' && typeof doc[pk] != 'number'))
             .remove();
         }
+
         await this.removeCollectionExcessDocuments(name);
       }
     }
@@ -122,11 +130,13 @@ export default (Parent) => {
       let order = collection.limitationOrder || '$accessedAt';
       !Array.isArray(order) && (order = [order]);
       const newOrder = [];
+
       for (let i = 0; i < order.length; i++) {
         let item = order[i];
         item = Array.isArray(item) ? [item[0], item[1] == 'desc'] : [item, false];
         newOrder.push(item);
       }
+
       await this.removeCollectionExcessDocumentsByLimit(name, newOrder);
       await this.removeCollectionExcessDocumentsBySize(name, newOrder);
     }
@@ -138,9 +148,11 @@ export default (Parent) => {
       const fullName = this.createCollectionName(name);
       const collection = await this.node.getCollection(name);
       const count = await this.getCollectionSize(name);
+
       if (!collection.limit || count <= collection.limit) {
         return;
       }
+
       this.col[fullName].chain().find().compoundsort(order).limit(count - collection.limit).remove();
     }
 
@@ -150,19 +162,25 @@ export default (Parent) => {
     async removeCollectionExcessDocumentsBySize(name, order) {
       const fullName = this.createCollectionName(name);
       const collection = await this.node.getCollection(name);
+
       if (!collection.maxSize) {
         return;
       }
+
       let size = sizeof(this.col[fullName].data);
+
       if (size <= collection.maxSize) {
         return;
       }
+
       const docs = this.col[fullName].chain().find().compoundsort(order).data();
+
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
         let docSize = sizeof(doc);
         this.col[fullName].remove(doc);
         size -= docSize;
+
         if (size <= collection.maxSize) {
           break;
         }
@@ -187,17 +205,21 @@ export default (Parent) => {
       const count = await this.getCollectionSize(name);
       const colData = this.col[fullName].data;
       const errMsg = `Too much documents are in collection "${name}", you can't add new one`;
+
       if (collection.limit && !collection.queue && count >= collection.limit) {
         throw new errors.WorkError(errMsg, 'ERR_METASTOCLE_DOCUMENTS_LIMIT');
       }
+
       delete document.$loki;
       document.$createdAt = document.$updatedAt = document.$accessedAt = Date.now();
       document[collection.duplicationKey] = document[collection.duplicationKey] || this.createDocumentDuplicationKey(document);
       document.$collection = name;
       document = await this.handleDocument(document);
+
       if (collection.maxSize && !collection.queue && sizeof(colData) + sizeof(document) > collection.maxSize) {
         throw new errors.WorkError(errMsg, 'ERR_METASTOCLE_DOCUMENTS_MAX_SIZE');
       }
+
       document = this.col[fullName].insert(document);
       await this.removeCollectionExcessDocuments(name);
       return await this.prepareDocumentToGet(document);
@@ -211,7 +233,9 @@ export default (Parent) => {
         const msg = `Document must have "$collection" field`;
         throw new errors.WorkError(msg, 'ERR_METASTOCLE_INVALID_DOCUMENT_COLLECTION');
       }
+
       const collection = await this.node.getCollection(document.$collection);
+
       if (collection.defaults) {
         for (let key in collection.defaults) {
           const handler = collection.defaults[key];
@@ -221,6 +245,7 @@ export default (Parent) => {
           set(document, key, typeof handler == 'function' ? await handler(key, document, prevDocument) : handler);
         }
       }
+
       if (collection.setters) {
         for (let key in collection.setters) {
           const handler = collection.setters[key];
@@ -229,6 +254,7 @@ export default (Parent) => {
           set(document, key, value);
         }
       }
+
       return document;
     }
 
@@ -240,7 +266,9 @@ export default (Parent) => {
         const msg = `Document must have "$collection" field`;
         throw new errors.WorkError(msg, 'ERR_METASTOCLE_INVALID_DOCUMENT_COLLECTION');
       }
+
       const collection = await this.node.getCollection(document.$collection);
+
       if (collection.getters) {
         for (let key in collection.getters) {
           const handler = collection.getters[key];
@@ -248,6 +276,7 @@ export default (Parent) => {
           set(document, key, typeof handler == 'function' ? await handler(value, key, document) : handler);
         }
       }
+
       return document;
     }
 
@@ -259,24 +288,28 @@ export default (Parent) => {
         const msg = `Document must have "$collection" field`;
         throw new errors.WorkError(msg, 'ERR_METASTOCLE_INVALID_DOCUMENT_COLLECTION');
       }
+
       const fullName = this.createCollectionName(document.$collection);
       const collection = await this.node.getCollection(document.$collection);
       document = await this.prepareDocumentToSet(document, options.prevState || null);
+      
       if (collection.schema) {
         utils.validateSchema(collection.schema, document);
       }
+
       if (collection.pk) {
         const pkValue = document[collection.pk];
         const pkCheckOptions = { [collection.pk]: pkValue };
         document.$loki && (pkCheckOptions.$loki = { $ne: document.$loki });
+        
         if (pkValue && typeof pkValue !== 'string' && typeof pkValue !== 'number') {
           const msg = `Primary key for "${collection.pk}" must be a string or a number`;
           throw new errors.WorkError(msg, 'ERR_METASTOCLE_INVALID_DOCUMENT_PK_TYPE');
         }
-        else if (pkValue &&
-                    ((options.pks && options.pks[pkValue] &&
-                        (!document.$loki || (options.pks[pkValue].$loki != document.$loki))) ||
-                        (!options.pks && this.col[fullName].chain().find(pkCheckOptions).count()))) {
+        else if (pkValue && ((options.pks && options.pks[pkValue] &&
+          (!document.$loki || (options.pks[pkValue].$loki != document.$loki))) ||
+          (!options.pks && this.col[fullName].chain().find(pkCheckOptions).count()))
+        ) {
           const msg = `Primary key "${pkValue}" for "${collection.pk}" already exists`;
           throw new errors.WorkError(msg, 'ERR_METASTOCLE_DOCUMENT_PK_EXISTS');
         }
@@ -284,10 +317,12 @@ export default (Parent) => {
           document[collection.pk] = this.createDocumentPrimaryKey(document);
         }
       }
+
       if (!document.$loki && this.col[fullName].chain().find({ [collection.duplicationKey]: document[collection.duplicationKey] }).count()) {
         const msg = `The duplicate key "${document[collection.duplicationKey]}" already exists`;
         throw new errors.WorkError(msg, 'ERR_METASTOCLE_DOCUMENT_DUPLICATE_EXISTS');
       }
+
       return document;
     }
 
@@ -307,9 +342,11 @@ export default (Parent) => {
     async getDocuments(name) {
       const fullName = this.createCollectionName(name);
       const documents = this.col[fullName].find();
+
       for (let i = 0; i < documents.length; i++) {
         documents[i] = await this.prepareDocumentToGet(documents[i]);
       }
+
       return documents;
     }
 
@@ -330,6 +367,7 @@ export default (Parent) => {
       for (let i = 0; i < documents.length; i++) {
         documents[i] = await this.prepareDocumentToGet(await this.accessDocument(documents[i]));
       }
+
       return documents;
     }
 
@@ -353,22 +391,29 @@ export default (Parent) => {
       const fullName = this.createCollectionName(name);
       const collection = await this.node.getCollection(name);
       const pks = {};
+     
       if (collection.pk) {
         const docs = this.col[fullName].find();
         docs.forEach(d => pks[d[collection.pk]] = d);
       }
+
       for (let i = 0; i < documents.length; i++) {
         let prevPkValue;
+        
         if (collection.pk) {
           prevPkValue = documents[i][collection.pk];
         }
+
         documents[i] = await this.updateDocument(documents[i], { pks });
+        
         if (collection.pk) {
           delete pks[prevPkValue];
           pks[documents[i][collection.pk]] = documents[i];
         }
+
         documents[i] = await this.prepareDocumentToGet(documents[i]);
       }
+      
       return documents;
     }
 

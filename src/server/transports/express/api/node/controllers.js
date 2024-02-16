@@ -9,10 +9,12 @@ export const addDocument = node => {
       await node.documentAvailabilityTest(info);
       document = await node.db.addDocument(info.collection, document);
       const collection = await node.getCollection(info.collection);
+
       if (duplicates.length) {
         const doc = node.db.removeDocumentSystemFields(document, [collection.duplicationKey]);
         node.duplicateDocument(duplicates, doc, info).catch(err => node.logger.error(err.stack));
       }
+      
       document = node.db.removeDocumentSystemFields(document);
       document = await collection.prepareDocumentFromNode(document);
       res.send({ document });

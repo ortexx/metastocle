@@ -13,6 +13,7 @@ export default function () {
   describe('routes', () => {
     let node;
     let client;
+    
     before(async function () {
       node = new Node(await tools.createNodeOptions({
         network: {
@@ -29,15 +30,18 @@ export default function () {
       }));
       await client.init();
     });
+
     after(async function () {
       await node.deinit();
       await client.deinit();
     });
+
     describe('/status', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/status`);
         assert.equal(await res.status, 401);
       });
+
       it('should return the status', async function () {
         const options = client.createDefaultRequestOptions({ method: 'get' });
         const res = await fetch(`http://${node.address}/status`, options);
@@ -46,6 +50,7 @@ export default function () {
           utils.validateSchema(schema.getStatusResponse(), json);
         });
       });
+
       it('should return the pretty status', async function () {
         const options = client.createDefaultRequestOptions({ method: 'get' });
         const res = await fetch(`http://${node.address}/status?pretty`, options);
@@ -60,11 +65,13 @@ export default function () {
         const res = await fetch(`http://${node.address}/client/add-document`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return an error', async function () {
         const options = client.createDefaultRequestOptions();
         const res = await fetch(`http://${node.address}/client/add-document`, options);
         assert.equal(res.status, 422);
       });
+
       it('should add the document', async function () {
         const body = {
           collection: 'test',
@@ -77,16 +84,19 @@ export default function () {
         assert.equal(await node.getDocumentsCount('test', { filter: { id: 1 } }), 1, 'check the existence');
       });
     });
+
     describe('/client/update-documents', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/client/update-documents`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return an error', async function () {
         const options = client.createDefaultRequestOptions();
         const res = await fetch(`http://${node.address}/client/update-documents`, options);
         assert.equal(res.status, 422);
       });
+
       it('should update the document', async function () {
         const body = {
           collection: 'test',
@@ -98,6 +108,7 @@ export default function () {
         assert.equal(json.updated, 1, 'check the response');
         assert.equal(await node.getDocumentsCount('test', { filter: { x: 1 } }), 1, 'check the update');
       });
+
       it('should not update the filtered document', async function () {
         const body = {
           collection: 'test',
@@ -112,11 +123,13 @@ export default function () {
         assert.equal(json.updated, 0);
       });
     });
+
     describe('/client/get-documents', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/client/get-documents`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should get the documents', async function () {
         const body = { collection: 'test' };
         const options = client.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));
@@ -124,6 +137,7 @@ export default function () {
         const json = await res.json();
         assert.lengthOf(json.documents, 1);
       });
+
       it('should get an empty documents array because of the filter', async function () {
         const body = {
           collection: 'test',
@@ -137,11 +151,13 @@ export default function () {
         assert.equal(json.documents, 0);
       });
     });
+
     describe('/client/get-documents-count', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/client/get-documents-count`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should get the documents count', async function () {
         const body = { collection: 'test' };
         const options = client.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));
@@ -149,6 +165,7 @@ export default function () {
         const json = await res.json();
         assert.equal(json.count, 1);
       });
+
       it('should get zero because of the filter', async function () {
         const body = {
           collection: 'test',
@@ -162,11 +179,13 @@ export default function () {
         assert.equal(json.count, 0);
       });
     });
+
     describe('/client/get-document-by-pk', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/client/get-document-by-pk`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should get the document', async function () {
         const body = {
           collection: 'test',
@@ -177,6 +196,7 @@ export default function () {
         const json = await res.json();
         assert.equal(json.document.id, 1);
       });
+
       it('should get null because of the filter', async function () {
         const body = {
           collection: 'test',
@@ -188,11 +208,13 @@ export default function () {
         assert.isNull(json.document);
       });
     });
+
     describe('/client/delete-document/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/client/delete-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should not delete the filtered document', async function () {
         const body = {
           collection: 'test',
@@ -205,6 +227,7 @@ export default function () {
         const json = await res.json();
         assert.equal(json.deleted, 0);
       });
+
       it('should delete all documents', async function () {
         const body = { collection: 'test' };
         const count = await node.getDocumentsCount('test');
@@ -215,19 +238,23 @@ export default function () {
         assert.equal(await node.getDocumentsCount('test'), 0, 'check the existence');
       });
     });
+
     describe('/api/master/get-document-addition-info/', function () {
       before(async function () {
         await node.addDocument('test', { id: 1 });
       });
+
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/master/get-document-addition-info/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/master/get-document-addition-info/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 2,
@@ -243,16 +270,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/master/get-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/master/get-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/master/get-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 2,
@@ -266,16 +296,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/master/update-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/master/update-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/master/update-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 2,
@@ -290,16 +323,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/master/delete-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/master/delete-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/master/delete-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 2,
@@ -313,16 +349,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/butler/get-document-addition-info/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/butler/get-document-addition-info/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/butler/get-document-addition-info/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 1,
@@ -338,6 +377,7 @@ export default function () {
         });
       });
     });
+
     describe('/api/butler/get-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/butler/get-documents/`, { method: 'post' });
@@ -361,16 +401,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/butler/update-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/butler/update-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/butler/update-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 1,
@@ -385,16 +428,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/butler/delete-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/butler/delete-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/butler/delete-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 1,
@@ -408,16 +454,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/slave/get-document-addition-info/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/slave/get-document-addition-info/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/slave/get-document-addition-info/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 0,
@@ -433,16 +482,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/slave/get-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/slave/get-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/slave/get-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = { collection: 'test' };
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));
@@ -453,16 +505,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/slave/update-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/slave/update-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/slave/update-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = {
           level: 0,
@@ -477,16 +532,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/slave/delete-documents/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/slave/delete-documents/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return a data error', async function () {
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions());
         const res = await fetch(`http://${node.address}/api/slave/delete-documents/`, options);
         assert.equal(res.status, 422);
       });
+
       it('should return the right schema', async function () {
         const body = { collection: 'test' };
         const options = node.createDefaultRequestOptions(tools.createJsonRequestOptions({ body }));
@@ -497,16 +555,19 @@ export default function () {
         });
       });
     });
+
     describe('/api/node/add-document/', function () {
       it('should return an auth error', async function () {
         const res = await fetch(`http://${node.address}/api/node/add-document/`, { method: 'post' });
         assert.equal(await res.status, 401);
       });
+
       it('should return an error', async function () {
         const options = node.createDefaultRequestOptions();
         const res = await fetch(`http://${node.address}/api/node/add-document/`, options);
         assert.equal(res.status, 422);
       });
+      
       it('should return the right schema', async function () {
         const body = {
           level: 0,

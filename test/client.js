@@ -10,6 +10,7 @@ export default function () {
   describe('Client', () => {
     let client;
     let node;
+
     before(async function () {
       node = new Node(await tools.createNodeOptions({
         collections: {
@@ -19,20 +20,24 @@ export default function () {
       }));
       await node.init();
     });
+
     after(async function () {
       await node.deinit();
     });
+
     describe('instance creation', function () {
       it('should create an instance', async function () {
         const options = await tools.createClientOptions({ address: node.address });
         assert.doesNotThrow(() => client = new Client(options));
       });
     });
+
     describe('.init()', function () {
       it('should not throw an exception', async function () {
         await client.init();
       });
     });
+
     describe('.addDocument()', () => {
       it('should add the document', async () => {
         const collection = 'test1';
@@ -42,6 +47,7 @@ export default function () {
         assert.equal(JSON.stringify(document), JSON.stringify(result), JSON.stringify(dbResult));
       });
     });
+
     describe('.getDocuments()', () => {
       it('should get all documents', async () => {
         const collection = 'test1';
@@ -50,6 +56,7 @@ export default function () {
         assert.lengthOf(result.documents, 2, 'check the array length');
         assert.equal(result.totalCount, 2, 'check the total count');
       });
+
       it('should get documents with actions', async () => {
         const result = await client.getDocuments('test1', {
           filter: {
@@ -70,11 +77,13 @@ export default function () {
         const result = await client.updateDocuments(collection, { z: 1 });
         const documents = await node.db.getDocuments(collection);
         assert.equal(result.updated, count, 'check the count');
+        
         for (let i = 0; i < documents.length; i++) {
           assert.equal(documents[i].z, 1, 'check the key');
           assert.containsAllKeys(documents[i], ['x', 'y'], 'check the rest keys');
         }
       });
+
       it('should update documents with actions', async () => {
         const collection = 'test1';
         let result = await node.updateDocuments(collection, { z: 2 }, { filter: { x: 2 } });
@@ -92,6 +101,7 @@ export default function () {
         assert.equal(result.deleted, count, 'check the count');
         assert.lengthOf(documents, 0, 'check the length');
       });
+
       it('should delete filtered documents', async () => {
         const collection = 'test1';
         await client.addDocument(collection, { x: 1, y: 1 });
@@ -111,6 +121,7 @@ export default function () {
         const result = await client.getDocumentsCount(collection);
         assert.equal(count, result);
       });
+
       it('should get the right filtered count', async () => {
         const result = await client.getDocumentsCount('test1', { filter: { x: 'wrong' } });
         assert.equal(result, 0);
@@ -123,11 +134,13 @@ export default function () {
         const document = await client.getDocumentByPk(collection, 1);
         assert.equal(document.id, 1);
       });
+
       it('should not get the document', async () => {
         const document = await client.getDocumentByPk('test2', 'wrong');
         assert.isNull(document);
       });
     });
+    
     describe('.deinit()', function () {
       it('should not throw an exception', async function () {
         await client.deinit();

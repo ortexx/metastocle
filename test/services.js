@@ -13,16 +13,20 @@ export default function () {
       this.node = new Node(await tools.createNodeOptions({ server: false }));
       await this.node.init();
     });
+
     after(async function () {
       await this.node.destroy();
     });
+
     describe('db', () => {
       describe('database', database.bind(this));
       describe('loki', loki.bind(this));
     });
+
     describe('collection', () => {
       describe('collection', collection.bind(this));
     });
+    
     describe('server', () => {
       describe('express', express.bind(this));
     });

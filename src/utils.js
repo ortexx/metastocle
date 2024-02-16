@@ -1,13 +1,13 @@
 import { get, merge, orderBy, pick, pickBy } from "lodash-es";
-import _utils from "spreadable-ms/src/utils.js";
+import _utils from "spreadable/src/utils.js";
 import errors from "./errors.js";
+
 const utils = Object.assign({}, _utils);
 
 /**
  * Class to handle documents: to filter, order, limit and etc.
  */
 utils.DocumentsHandler = class {
-
   /**
    * @param {object[]} documents
    */
@@ -41,13 +41,16 @@ utils.DocumentsHandler = class {
   sortDocuments(sort = []) {
     const fields = [];
     const directions = [];
+
     if (!Array.isArray(sort)) {
       throw new errors.WorkError(`Sort rule must be an array`, 'ERR_METASTOCLE_DOCUMENTS_HANDLER_SORT_TYPE');
     }
+
     for (let i = 0; i < sort.length; i++) {
       const order = sort[i];
       let field = order;
       let direction = 'asc';
+
       if (Array.isArray(order)) {
         field = order[0];
         direction = order[1];
@@ -55,6 +58,7 @@ utils.DocumentsHandler = class {
       fields.push(field);
       directions.push(direction);
     }
+
     this.__documents = orderBy(this.__documents, fields, directions);
   }
 
@@ -70,7 +74,7 @@ utils.DocumentsHandler = class {
   }
 
   /**
-   * pick the documents fields
+   * Pick the documents fields
    *
    * @param {string[]} fields
    */
@@ -78,6 +82,7 @@ utils.DocumentsHandler = class {
     if (!Array.isArray(fields)) {
       throw new errors.WorkError(`Fields must be an array`, 'ERR_METASTOCLE_DOCUMENTS_HANDLER_FIELD_TYPE');
     }
+
     this.__documents = this.__documents.map(d => pickBy(d, (v, k) => fields.includes(k) || k.startsWith('$')));
   }
 
@@ -92,6 +97,7 @@ utils.DocumentsHandler = class {
     if (!filter || typeof filter != 'object' || Array.isArray(filter)) {
       return this.$eq(value, filter);
     }
+
     for (let key in filter) {
       if (key == '$and') {
         for (let i = 0; i < filter[key].length; i++) {
@@ -101,6 +107,7 @@ utils.DocumentsHandler = class {
         }
         continue;
       }
+
       if (key == '$or') {
         let ok = false;
         for (let i = 0; i < filter[key].length; i++) {
@@ -109,20 +116,26 @@ utils.DocumentsHandler = class {
             break;
           }
         }
+
         if (!ok) {
           return false;
         }
+
         continue;
       }
+
       if (key.startsWith('$')) {
         if (typeof this[key] != 'function') {
           throw new errors.WorkError(`There is no filter for key "${key}"`, 'ERR_METASTOCLE_DOCUMENTS_HANDLER_WRONG_FILTER');
         }
+
         if (!this[key](value, filter[key])) {
           return false;
         }
+
         continue;
       }
+
       if (!this.checkDocumentValue(get(value, key), filter[key])) {
         return false;
       }
@@ -612,25 +625,31 @@ utils.prepareDocumentFilter = function (filter) {
     const msg = `Document filter must must be an object`;
     throw new errors.WorkError(msg, 'ERR_METASTOCLE_WRONG_DOCUMENT_FILTER');
   }
+
   for (let key in filter) {
     const val = filter[key];
+    
     if (key == '$and' || key == '$or') {
       filter[key] = this.prepareDocumentFilter(val);
       continue;
     }
+
     if (val instanceof RegExp) {
       filter[key] = { source: val.source, flags: val.flags };
       continue;
     }
+
     if (val instanceof Date) {
       filter[key] = val.getTime();
       continue;
     }
+
     if (typeof val == 'object') {
       filter[key] = this.prepareDocumentFilter(val);
       continue;
     }
   }
+
   return filter;
 };
 
@@ -645,6 +664,7 @@ utils.prepareDocumentFields = function (fields) {
     const msg = `Document fields must must be an object`;
     throw new errors.WorkError(msg, 'ERR_METASTOCLE_WRONG_DOCUMENT_FIELDS');
   }
+
   for (let key in fields) {
     const val = fields[key];
     if (val instanceof Date) {
@@ -656,6 +676,7 @@ utils.prepareDocumentFields = function (fields) {
       continue;
     }
   }
+  
   return fields;
 };
 

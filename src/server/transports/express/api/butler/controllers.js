@@ -34,12 +34,13 @@ export const getDocuments = node => {
         })
       });
       const results = await node.requestNetwork('get-documents', options);
+
       try {
         res.send(await node.handleDocumentsGettingForButler(req.collection, results, req.actions));
       }
       catch (err) {
         throw new errors.WorkError(err.message, 'ERR_METASTOCLE_DOCUMENTS_HANDLER');
-      }
+      }      
     }
     catch (err) {
       next(err);

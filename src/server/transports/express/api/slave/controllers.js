@@ -26,6 +26,7 @@ export const getDocuments = node => {
       const isCounting = req.body.isCounting;
       const pkValue = req.body.pkValue;
       let documents = [];
+
       if (pkValue) {
         const document = await node.db.getDocumentByPk(req.collection.name, pkValue);
         document && documents.push(document);
@@ -33,7 +34,9 @@ export const getDocuments = node => {
       else {
         documents = await node.db.getDocuments(req.collection.name);
       }
+
       const result = await node.handleDocumentsGettingForSlave(req.collection, documents, req.actions);
+     
       if (isCounting) {
         documents = result.documents.map(d => pick(d, req.collection.duplicationKey));
       }
@@ -41,6 +44,7 @@ export const getDocuments = node => {
         documents = await node.db.accessDocuments(req.collection.name, result.accessDocuments);
         documents = result.documents.map(d => node.db.removeDocumentSystemFields(d, [req.collection.duplicationKey]));
       }
+      
       for (let i = 0; i < documents.length; i++) {
         documents[i] = await req.collection.prepareDocumentFromSlave(documents[i]);
         if (!documents[i]) {

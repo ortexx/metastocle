@@ -8,6 +8,7 @@ const Node = node();
 export default function () {
   describe('Node', () => {
     let node;
+
     describe('instance creation', () => {
       it('should create an instance', async () => {
         const options = await tools.createNodeOptions({
@@ -20,6 +21,7 @@ export default function () {
         assert.doesNotThrow(() => node = new Node(options));
       });
     });
+
     describe('.init()', () => {
       it('should not throw an exception', async () => {
         await node.init();
@@ -28,6 +30,7 @@ export default function () {
         assert.isObject(await node.getCollection('start'));
       });
     });
+
     describe('.addCollection()', () => {
       it('should add the collection', async () => {
         const name = 'test';
@@ -35,6 +38,7 @@ export default function () {
         assert.equal((await node.getCollection('test')).name, name);
       });
     });
+
     describe('.getCollection()', () => {
       it('should get the collection', async () => {
         const name = 'test';
@@ -42,6 +46,7 @@ export default function () {
         assert.equal(collection.name, name);
       });
     });
+
     describe('.removeCollection()', () => {
       it('should remove the collection', async () => {
         const name = 'test';
@@ -50,6 +55,7 @@ export default function () {
         assert.isNull(collection);
       });
     });
+
     describe('.collectionTest()', () => {
       it('should throw an exception', async () => {
         try {
@@ -60,10 +66,12 @@ export default function () {
           assert.isOk(err.message.match(`doesn't exist`));
         }
       });
+
       it('should nor throw an exception', async () => {
         await node.collectionTest('start');
       });
     });
+
     describe('.checkCollection()', () => {
       it('should return false', async () => {
         assert.isFalse(await node.checkCollection('wrong'));
@@ -72,6 +80,7 @@ export default function () {
         assert.isTrue(await node.checkCollection('start'));
       });
     });
+
     describe('.addDocument()', () => {
       it('should not add the document to the wrong collection', async () => {
         try {
@@ -82,21 +91,25 @@ export default function () {
           assert.isOk(err.message.match(`doesn't exist`));
         }
       });
+
       it('should add the document', async () => {
         const document = { x: 1, y: 1 };
         const result = await node.addDocument('test1', document);
         assert.equal(JSON.stringify(document), JSON.stringify(result));
       });
+
       it('should add the document with specified pk', async () => {
         const document = { id: 1, x: 1 };
         const result = await node.addDocument('test2', document);
         assert.equal(result.id, document.id);
       });
+
       it('should add the document with unspecified pk', async () => {
         const document = { x: 1 };
         const result = await node.addDocument('test2', document);
         assert.isString(result.id);
       });
+
       it('should not add the existent document', async () => {
         try {
           await node.addDocument('test2', { id: 1, x: 2 });
@@ -106,17 +119,20 @@ export default function () {
           assert.isOk(err.message.match('already exists'));
         }
       });
+
       it('should not add the existent document, but without an error', async () => {
         const result = await node.addDocument('test2', { id: 1, x: 2 }, { ignoreExistenceError: true });
         assert.equal(result.id, 1);
       });
     });
+
     describe('.getDocuments()', () => {
       it('should get the start document', async () => {
         const result = await node.getDocuments('test1');
         assert.lengthOf(result.documents, 1, 'check the array length');
         assert.equal(result.totalCount, 1, 'check the total count');
       });
+
       it('should get all documents', async () => {
         const collection = 'test1';
         await node.addDocument(collection, { x: 2, y: 2 });
@@ -126,10 +142,12 @@ export default function () {
         assert.equal(result.totalCount, 3, 'check the total count');
         assert.equal(result.documents[result.documents.length - 1].x, 1, 'check the order');
       });
+
       it('should get all documents sorted by x', async () => {
         const result = await node.getDocuments('test1', { sort: ['x'] });
         assert.equal(result.documents[result.documents.length - 1].x, 2);
       });
+
       it('should get all documents with the necessary keys', async () => {
         const result = await node.getDocuments('test1', { fields: ['y'] });
         const documents = result.documents;
@@ -137,11 +155,13 @@ export default function () {
           assert.isFalse(Object.prototype.hasOwnProperty.call(documents[i], 'x'));
         }
       });
+
       it('should get filtered documents', async () => {
         const result = await node.getDocuments('test1', { filter: { x: 1 } });
         assert.lengthOf(result.documents, 2, 'check the array length');
         assert.equal(result.totalCount, 2, 'check the total count');
       });
+
       it('should get limited documents', async () => {
         const result = await node.getDocuments('test1', { limit: 1, offset: 1 });
         assert.lengthOf(result.documents, 1, 'check the array length');
@@ -149,6 +169,7 @@ export default function () {
         assert.equal(result.totalCount, 3, 'check the total count');
       });
     });
+
     describe('.updateDocuments()', () => {
       it('should update all documents', async () => {
         const collection = 'test1';
@@ -156,11 +177,13 @@ export default function () {
         const result = await node.updateDocuments(collection, { z: 1 });
         const documents = await node.db.getDocuments(collection);
         assert.equal(result.updated, count, 'check the count');
+        
         for (let i = 0; i < documents.length; i++) {
           assert.equal(documents[i].z, 1, 'check the key');
           assert.containsAllKeys(documents[i], ['x', 'y'], 'check the rest keys');
         }
       });
+
       it('should update filtered documents', async () => {
         const collection = 'test1';
         let result = await node.updateDocuments(collection, { z: 2 }, { filter: { x: 2 } });
@@ -168,16 +191,19 @@ export default function () {
         result = await node.getDocuments(collection, { filter: { z: 2 } });
         assert.lengthOf(result.documents, 1, 'check the length');
       });
+
       it('should update all documents with replacement', async () => {
         const collection = 'test1';
         await node.updateDocuments(collection, { z: 0 }, { replace: true });
         const documents = await node.db.getDocuments(collection);
+        
         for (let i = 0; i < documents.length; i++) {
           assert.equal(documents[i].z, 0, 'check the key');
           assert.doesNotHaveAllKeys(documents[i], ['x', 'y'], 'check the rest keys');
         }
       });
     });
+
     describe('.deleteDocuments()', () => {
       it('should delete all documents', async () => {
         const collection = 'test1';
@@ -187,6 +213,7 @@ export default function () {
         assert.equal(result.deleted, count, 'check the count');
         assert.lengthOf(documents, 0, 'check the length');
       });
+
       it('should delete filtered documents', async () => {
         const collection = 'test1';
         await node.addDocument(collection, { x: 2, y: 2 });
@@ -198,6 +225,7 @@ export default function () {
         assert.equal(documents[0].x, 2, 'check the content');
       });
     });
+
     describe('.getDocumentsCount()', () => {
       it('should get the right count', async () => {
         const collection = 'test1';
@@ -206,25 +234,30 @@ export default function () {
         const result = await node.getDocumentsCount(collection);
         assert.equal(count, result);
       });
+
       it('should get the right filtered count', async () => {
         const result = await node.getDocumentsCount('test1', { filter: { x: 'wrong' } });
         assert.equal(result, 0);
       });
     });
+
     describe('.getDocumentByPk()', () => {
       it('should get the document', async () => {
         const document = await node.getDocumentByPk('test2', 1);
         assert.equal(document.id, 1);
       });
+
       it('should not get the document', async () => {
         const document = await node.getDocumentByPk('test2', 'wrong');
         assert.isNull(document);
       });
     });
+
     describe('.getDocumentExistenceInfo()', () => {
       it('should return null because of pkValue is not passed', async () => {
         assert.isNull(await node.getDocumentExistenceInfo({}));
       });
+
       it('should return null because of wrong pkValue', async () => {
         const info = {
           pkValue: 'wrong',
@@ -232,6 +265,7 @@ export default function () {
         };
         assert.isNull(await node.getDocumentExistenceInfo(info));
       });
+
       it('should return true', async () => {
         const info = {
           pkValue: 1,
@@ -240,6 +274,7 @@ export default function () {
         assert.isObject(await node.getDocumentExistenceInfo(info));
       });
     });
+
     describe('.checkDocumentFullness()', () => {
       it('should return false', async () => {
         const info = {
@@ -247,6 +282,7 @@ export default function () {
         };
         assert.isFalse(await node.checkDocumentFullness(info));
       });
+
       it('should return true', async () => {
         const info = {
           count: 10,
@@ -255,6 +291,7 @@ export default function () {
         assert.isTrue(await node.checkDocumentFullness(info));
       });
     });
+
     describe('.documentAvailabilityTest()', () => {
       it('should not throw an exception because of the count', async () => {
         const info = {
@@ -262,6 +299,7 @@ export default function () {
         };
         await node.documentAvailabilityTest(info);
       });
+
       it('should not throw an exception because of the queue', async () => {
         const info = {
           count: 10,
@@ -272,11 +310,13 @@ export default function () {
         await node.documentAvailabilityTest(info);
         collection.queue = false;
       });
+
       it('should throw an exception because of the limitation', async () => {
         const info = {
           count: 10,
           collection: 'test1'
         };
+
         try {
           await node.documentAvailabilityTest(info);
           throw new Error('Fail');
@@ -286,6 +326,7 @@ export default function () {
         }
       });
     });
+
     describe('.checkDocumentAvailability()', () => {
       it('should return false', async () => {
         const info = {
@@ -294,6 +335,7 @@ export default function () {
         };
         assert.isFalse(await node.checkDocumentAvailability(info));
       });
+
       it('should return true', async () => {
         const info = {
           collection: 'test1'
@@ -301,6 +343,7 @@ export default function () {
         assert.isTrue(await node.checkDocumentAvailability(info));
       });
     });
+
     describe('.chooseDocumentsDuplicate()', () => {
       it('should return null', async () => {
         assert.isNull(await node.chooseDocumentsDuplicate([]));
@@ -312,6 +355,7 @@ export default function () {
         assert.strictEqual(obj, await node.chooseDocumentsDuplicate(arr));
       });
     });
+
     describe('.uniqDocuments()', () => {
       it('should remove the duplicates', async () => {
         const arr = [
@@ -325,6 +369,7 @@ export default function () {
         assert.lengthOf(await node.uniqDocuments(collection, arr), 3);
       });
     });
+
     describe('.createDocumentFullSchema()', () => {
       it('should create the schema', () => {
         const schema = node.createDocumentFullSchema({
@@ -339,16 +384,19 @@ export default function () {
         assert.throws(() => utils.validateSchema(schema, { id: 1, y: 2 }), '', 'check the wrong data');
       });
     });
+
     describe('.deinit()', () => {
       it('should not throw an exception', async () => {
         await node.deinit();
       });
     });
+
     describe('reinitialization', () => {
       it('should not throw an exception', async () => {
         await node.init();
       });
     });
+    
     describe('.destroy()', () => {
       it('should not throw an exception', async () => {
         await node.destroy();

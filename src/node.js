@@ -1,6 +1,6 @@
 import { assign, flatten, get, groupBy, isPlainObject, merge, omitBy, orderBy } from "lodash-es";
-import node from "spreadable-ms/src/node.js";
-import pack from "../package.json" assert { type: "json" };
+import node from "spreadable/src/node.js";
+import pack from "../package.json" with { type: "json" };
 import collection from "./collection/transports/collection/index.js";
 import loki from "./db/transports/loki/index.js";
 import errors from "./errors.js";
@@ -14,7 +14,6 @@ const Collection = collection();
 const Node = node();
 
 export default (Parent) => {
-
   /**
    * Class to manage the node
    */
@@ -97,9 +96,11 @@ export default (Parent) => {
      */
     async addCollection(name, collection) {
       isPlainObject(collection) && (collection = new Collection(collection));
+      
       if (this.__initialized) {
         this.logger.warn(`Add collection "${name}" before the node initialization`);
       }
+
       return await this.addService(name, collection, 'collection');
     }
 
@@ -170,6 +171,7 @@ export default (Parent) => {
         if (options.ignoreExistenceError) {
           return preparedExtDoc;
         }
+
         const data = JSON.stringify(document, null, 1);
         throw new errors.WorkError(`Document ${data} already exists`, 'ERR_METASTOCLE_DOCUMENT_EXISTS');
       };
@@ -193,26 +195,34 @@ export default (Parent) => {
       const preparedExtDoc = extDoc ? await collection.prepareDocumentToGet(extDoc) : null;
       document = extDoc ? extDoc : document;
       document = merge(document, { [collection.duplicationKey]: document[collection.duplicationKey] });
+      
       if (limit <= 0) {
         return existenceErrFn();
       }
+
       const filterOptions = Object.assign(await this.getDocumentAdditionInfoFilterOptions(info), { limit });
       const candidates = await this.filterCandidatesMatrix(results.map(r => r.candidates), filterOptions);
+      
       if (!candidates.length && !existing.length) {
         throw new errors.WorkError('Not found a suitable server to add the document', 'ERR_METASTOCLE_NOT_FOUND_SERVER');
       }
+
       if (!candidates.length) {
         return existenceErrFn();
       }
+
       await this.db.addBehaviorCandidate('addDocument', candidates[0].address);
       const servers = candidates.map(c => c.address).sort(await this.createAddressComparisonFunction());
       const result = await this.duplicateDocument(servers, document, info, { timeout: timer() });
+      
       if (!result && !existing.length) {
         throw new errors.WorkError('Not found an available server to add the document', 'ERR_METASTOCLE_NOT_FOUND_SERVER');
       }
+
       if (existing.length) {
         return existenceErrFn();
       }
+
       return await collection.prepareDocumentToGet(result.document);
     }
 
@@ -369,9 +379,11 @@ export default (Parent) => {
       const totalCount = handler.getDocuments().length;
       (actions.limit || actions.offset) && handler.limitDocuments(actions.offset, actions.limit);
       documents = handler.getDocuments();
+      
       for (let i = 0; i < documents.length; i++) {
         documents[i] = await collection.prepareDocumentToGet(documents[i]);
       }
+
       return { documents, totalCount };
     }
 
@@ -410,6 +422,7 @@ export default (Parent) => {
         if (actions.replace) {
           return merge({}, omitBy(d, (v, k) => !k.startsWith('$')), document);
         }
+
         return merge({}, d, omitBy(document, (v, k) => k.startsWith('$')));
       });
       return { documents };
@@ -462,6 +475,7 @@ export default (Parent) => {
       if (info.pkValue === undefined) {
         return null;
       }
+
       const collection = await this.getCollection(info.collection);
       return await this.db.getDocumentByPk(collection.name, info.pkValue);
     }
@@ -493,6 +507,7 @@ export default (Parent) => {
         if (err instanceof errors.WorkError) {
           return false;
         }
+
         throw err;
       }
     }
@@ -509,6 +524,7 @@ export default (Parent) => {
     async documentAvailabilityTest(info = {}) {
       const collection = await this.getCollection(info.collection);
       const count = info.count || await this.db.getCollectionSize(collection.name);
+      
       if (!collection.queue && collection.limit && count >= collection.limit) {
         const msg = `Too much documents are in the collection "${collection.name}"`;
         throw new errors.WorkError(msg, 'ERR_METASCTOCLE_DOCUMENTS_LIMITED');
@@ -556,9 +572,11 @@ export default (Parent) => {
         if (a.isFull && !b.isFull) {
           return 1;
         }
+
         if (b.isFull && !a.isFull) {
           return -1;
         }
+
         return a.count - b.count;
       };
     }
@@ -606,9 +624,11 @@ export default (Parent) => {
       if (scheme && typeof scheme != 'object' || Array.isArray(scheme)) {
         throw new Error('Document schema must be an object');
       }
+
       if (!scheme) {
         return;
       }
+      
       scheme = merge({ expected: true }, scheme, schema.getDocumentSystemFields({ duplicationKey }));
       return scheme;
     }

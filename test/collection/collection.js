@@ -7,18 +7,21 @@ const Collection = collection();
 export default function () {
   describe('Behavior', () => {
     let collection;
+
     describe('instance creation', function () {
       it('should create an instance', function () {
         assert.doesNotThrow(() => collection = new Collection());
         collection.node = this.node;
         collection.name = 'test';
       });
+
       it('should create the default properties', function () {
         assert.containsAllKeys(collection, [
           'pk', 'limit', 'queue', 'limitationOrder', 'preferredDuplicates'
         ]);
       });
     });
+
     describe('.init()', function () {
       it('should not throw an exception', async function () {
         await collection.init();
@@ -27,6 +30,7 @@ export default function () {
         assert.containsAllKeys(collection, ['schema']);
       });
     });
+
     describe('.prepareDocumentToAdd()', () => {
       it('should create the right document', async () => {
         const schema = {
@@ -41,6 +45,7 @@ export default function () {
         assert.doesNotThrow(() => utils.validateSchema(schema, document));
       });
     });
+
     describe('.prepareDocumentToUpdate()', () => {
       it('should create the right document', async () => {
         const schema = {
@@ -55,6 +60,7 @@ export default function () {
         assert.doesNotThrow(() => utils.validateSchema(schema, document));
       });
     });
+
     describe('.prepareDocumentToGet()', () => {
       it('should create the right document', async () => {
         const schema = {
@@ -68,16 +74,19 @@ export default function () {
         assert.doesNotThrow(() => utils.validateSchema(schema, document));
       });
     });
+
     describe('.deinit()', function () {
       it('should not throw an exception', async function () {
         await collection.deinit();
       });
     });
+
     describe('reinitialization', () => {
       it('should not throw an exception', async function () {
         await collection.init();
       });
     });
+    
     describe('.destroy()', function () {
       it('should not throw an exception', async function () {
         await collection.destroy();

@@ -34,6 +34,7 @@ export const getDocuments = node => {
         })
       });
       const results = await node.requestNetwork('get-documents', options);
+      
       try {
         res.send(await node.handleDocumentsGettingForMaster(req.collection, results, req.actions));
       }

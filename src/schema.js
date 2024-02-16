@@ -1,6 +1,8 @@
 import merge from "lodash-es/merge.js";
-import _schema from "spreadable-ms/src/schema.js";
+import _schema from "spreadable/src/schema.js";
+
 const schema = Object.assign({}, _schema);
+
 schema.getStatusResponse = function () {
   return merge(_schema.getStatusResponse(), {
     props: {
@@ -15,9 +17,11 @@ schema.getStatusResponse = function () {
     }
   });
 };
+
 schema.getStatusPrettyResponse = function () {
   return merge(this.getStatusResponse(), _schema.getStatusPrettyResponse());
 };
+
 schema.getDocumentSystemFields = function (options = {}) {
   const props = {
     $collection: 'string',
@@ -32,12 +36,14 @@ schema.getDocumentSystemFields = function (options = {}) {
     props
   };
 };
+
 schema.getDocumentExistenceInfo = function (options = {}) {
   return Object.assign({}, options.schema, {
     type: 'object',
     canBeNull: true
   });
 };
+
 schema.getDocumentAdditionResponse = function (options = {}) {
   const address = this.getAddress();
   return {
@@ -49,9 +55,11 @@ schema.getDocumentAdditionResponse = function (options = {}) {
     strict: true
   };
 };
+
 schema.getDocumentAdditionInfoMasterResponse = function (options = {}) {
   return this.getDocumentAdditionInfoButlerResponse(options);
 };
+
 schema.getDocumentAdditionInfoButlerResponse = function (options = {}) {
   const address = this.getAddress();
   return {
@@ -79,6 +87,7 @@ schema.getDocumentAdditionInfoButlerResponse = function (options = {}) {
     strict: true
   };
 };
+
 schema.getDocumentAdditionInfoSlaveResponse = function (options = {}) {
   return {
     type: 'object',
@@ -92,15 +101,19 @@ schema.getDocumentAdditionInfoSlaveResponse = function (options = {}) {
     strict: true
   };
 };
+
 schema.getDocumentsMasterResponse = function (options) {
   return this.getDocumentsButlerResponse(options);
 };
+
 schema.getDocumentsButlerResponse = function (options) {
   return this.getDocumentsSlaveResponse(options);
 };
+
 schema.getDocumentsSlaveResponse = function (options = {}) {
   const address = this.getAddress();
   let items = options.schema || { type: 'object' };
+  
   if (options.isCounting) {
     const props = {};
     options.duplicationKey && (props[options.duplicationKey] = ['string', 'number']);
@@ -110,6 +123,7 @@ schema.getDocumentsSlaveResponse = function (options = {}) {
       strict: true
     };
   }
+
   return {
     type: 'object',
     props: {
@@ -122,12 +136,15 @@ schema.getDocumentsSlaveResponse = function (options = {}) {
     strict: true
   };
 };
+
 schema.updateDocumentsMasterResponse = function () {
   return this.updateDocumentsButlerResponse();
 };
+
 schema.updateDocumentsButlerResponse = function () {
   return this.updateDocumentsSlaveResponse();
 };
+
 schema.updateDocumentsSlaveResponse = function () {
   const address = this.getAddress();
   return {
@@ -139,12 +156,15 @@ schema.updateDocumentsSlaveResponse = function () {
     strict: true
   };
 };
+
 schema.deleteDocumentsMasterResponse = function () {
   return this.deleteDocumentsButlerResponse();
 };
+
 schema.deleteDocumentsButlerResponse = function () {
   return this.deleteDocumentsSlaveResponse();
 };
+
 schema.deleteDocumentsSlaveResponse = function () {
   const address = this.getAddress();
   return {

@@ -1,5 +1,6 @@
 import utils from "../../../utils.js";
-import _midds from "spreadable-ms/src/server/transports/express/midds.js";
+import _midds from "spreadable/src/server/transports/express/midds.js";
+
 const midds = Object.assign({}, _midds);
 
 /**

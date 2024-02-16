@@ -1,8 +1,8 @@
 import merge from "lodash-es/merge.js";
-import client from "spreadable-ms/src/client.js";
+import client from "spreadable/src/client.js";
 import utils from "./utils.js";
 import errors from "./errors.js";
-import pack from "../package.json" assert { type: "json" }
+import pack from "../package.json" with { type: "json" }
 
 const Client = client();
 
